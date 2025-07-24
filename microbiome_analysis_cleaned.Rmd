@@ -4,6 +4,11 @@ author: "Diana Proctor"
 date: "2025-06-07"
 output: html_document
 ---
+last updated: `r format(Sys.Date(), format="%B %d %Y")`
+
+***
+
+
 
 Manuscript Title: 
 
@@ -1346,215 +1351,107 @@ fig1D <- plot_grid(fig1d1, fig1d2, fig1d3, fig1d4, fig1d5, fig1d6,
 fig1D
 ```
 save figure 1d
-```{r}
+```{r, fig.height=5, fig.width=5}
 ggsave(fig1D, file="~/Desktop/github/perez_diet/fig1D.pdf", device="pdf", height = 12, width = 7)
 ggsave(fig1D, file="~/Desktop/github/perez_diet/fig1D.eps", device="eps", height = 12, width = 7)
 
 ```
 
-
-
-
-
-# Let's do formal differential abundance testing for a priori statistical tests
-we were initially interested in between group differences G1 vs G2 and G3 vs G4
+### Let's look at T1 vs T1, T2 vs T2, etc. with aldex
 ```{r, fig.height=5, fig.width=5}
-# get counts
-otu_mat <- as.data.frame(otu_table(phy_filt))
-conds   <- sample_data(phy_filt)$Diet
 
-# run aldex (uses CLR internally)
-ald <- aldex(
-  t(otu_mat),          # ALDEx2 wants features in columns
-  conds,
-  test     = "t",
-  effect   = TRUE,
-  denom    = "all"
-)
-
-# ald now has expected CLR differences & p‑values
-#head(ald)
-
-# Basic MA‑style plot: effect size vs mean abundance
-#aldex.plot(ald, type = "MA", test = "wilcox",
-#           xlab = "Mean CLR abundance",
-#           ylab = "CLR difference (Day 8–Day 2)",
-#           main = "ALDEx2 MA Plot (Treatment)")
-
-
-
-
-tax_df <- as.data.frame(tax_table(phy_filt)) %>% rownames_to_column("OTU")
-
-ald_df <- as.data.frame(ald) %>%
-  rownames_to_column(var = "OTU") %>%
-  # explicitly use dplyr's select
-  left_join(
-    dplyr::select(tax_df, OTU, Genus),
-    by = "OTU"
-  ) %>%
-  mutate(
-    signif  = wi.eBH < 0.05,
-    x       = rab.all,
-    y       = diff.btw
+plot_aldex_by_time <- function(phy_obj, time_point) {
+  # Filter samples by Time_label using prune_samples
+  samples_to_keep <- sample_names(phy_obj)[sample_data(phy_obj)$Time_label == time_point]
+  
+  if(length(samples_to_keep) == 0) {
+    stop(paste("No samples found for Time_label =", time_point))
+  }
+  
+  phy_sub <- prune_samples(samples_to_keep, phy_obj)
+  
+  # Extract OTU counts and conditions
+  otu_mat <- as.data.frame(otu_table(phy_sub))
+  conds <- sample_data(phy_sub)$Diet
+  
+  # Run ALDEx2 test
+  ald <- aldex(
+    t(otu_mat),
+    conds,
+    test = "t",
+    effect = TRUE,
+    denom = "all"
   )
-# 2) Pick top 10 hits by absolute difference among significant
-top_hits <- ald_df %>%
-  filter(signif) %>%
-  slice_max(order_by = abs(y), n = 10)
+  
+  tax_df <- as.data.frame(tax_table(phy_sub)) %>% rownames_to_column("OTU")
+  
+  ald_df <- as.data.frame(ald) %>%
+    rownames_to_column(var = "OTU") %>%
+    left_join(
+      dplyr::select(tax_df, OTU, Genus),
+      by = "OTU"
+    ) %>%
+    mutate(
+      signif = wi.eBH < 0.05,
+      x = rab.all,
+      y = diff.btw
+    )
+  
+  top_hits <- ald_df %>%
+    filter(signif) %>%
+    slice_max(order_by = abs(y), n = 10)
+  
+  p <- ggplot(ald_df, aes(x = x, y = y)) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
+    geom_point(aes(color = signif), alpha = 0.6, size = 1.8) +
+    scale_color_manual(values = c("grey70", "firebrick")) +
+    geom_text_repel(
+      data = top_hits,
+      aes(label = Genus),
+      size = 3,
+      box.padding = 0.3,
+      point.padding = 0.2,
+      max.overlaps = 15
+    ) +
+    labs(
+      title = paste("ALDEx2 Diet Comparison at", time_point),
+      x = "Median CLR Abundance",
+      y = paste("Median CLR Difference (HOA vs control at", time_point, ")"),
+      color = "Adj. p < 0.05"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(legend.position = "right")
+  
+  return(p)
+}
 
-# 3) Plot
-figd = ggplot(ald_df, aes(x = x, y = y)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_point(aes(color = signif), alpha = 0.6, size = 1.8) +
-  scale_color_manual(values = c("grey70", "firebrick")) +
-  geom_text_repel(
-    data          = top_hits,
-    aes(label     = Genus),
-    size          = 3,
-    box.padding   = 0.3,
-    point.padding = 0.2,
-    max.overlaps  = 15
-  ) +
-  labs(
-    x     = "Median CLR Abundance",
-    y     = "Median CLR Difference",
-    color = "Adj. p < 0.05"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(legend.position = "right")
-
-figd
+# Plot ALDEx2 results for each Time point; but only display T2 cause it's the only one with a significant hit
+p_T1 <- plot_aldex_by_time(phy_filt, "T1")
+p_T2 <- plot_aldex_by_time(phy_filt, "T2")
+p_T3 <- plot_aldex_by_time(phy_filt, "T3")
+p_T2
 ```
 
-let's get the taxa that are differentially abundant between groups 3 and 4
-no taxa are significant between groups 3 and 4. Accetifactor is, but when we look at the abundance in the original samples we see that we go from <0.01 to < 0.02
+let's plot the relative abundnace of Acetatifactor
+```{r}
+phy_filt_ra = transform_sample_counts(phy_filt, function(x) x/sum(x))
+phy_acetatifactor <- subset_taxa(phy_filt_ra, Genus == "Acetatifactor") 
 
-```{r, fig.height=5, fig.width=5}
+tax.count <- data.frame(sample_data(phy_acetatifactor), otu_table(phy_acetatifactor)) %>%
+  reshape2::melt(., colnames(sample_data(phy_acetatifactor)))
 
-# Step 1: subset samples to just the two groups
-groups_of_interest <- c("G3", "G4")
-phy_sub <- subset_samples(phy_filt, Group %in% groups_of_interest)
-phy_sub <- prune_taxa(taxa_sums(phy_sub) > 0, phy_sub)
-
-# Step 2: extract OTU table and sample data
-otu_mat_sub <- as.data.frame(otu_table(phy_sub))
-samp_sub <- as(sample_data(phy_sub), "data.frame")
-
-# Step 3: get group vector for ALDEx2
-conds <- samp_sub$Group
-
-# Step 4: run ALDEx2
-ald_sub <- aldex(
-  t(otu_mat_sub),   # transpose so features are columns
-  conds,
-  test = "t",
-  effect = TRUE,
-  denom = "all"
-)
-
-# Step 5: annotate with taxonomy
-tax_df <- as.data.frame(tax_table(phy_sub)) %>% rownames_to_column("OTU")
-
-ald_df <- as.data.frame(ald_sub) %>%
-  rownames_to_column("OTU") %>%
-  left_join(dplyr::select(tax_df, OTU, Genus), by = "OTU") %>%
-  mutate(signif = wi.eBH < 0.05)
-
-#head(ald_df)
-
-
-# Pick top 10 taxa by absolute median difference among significant hits
-top_hits <- ald_df %>%
-  filter(signif) %>%
-  slice_max(order_by = abs(diff.btw), n = 10)
-
-ggplot(ald_df, aes(x = rab.all, y = diff.btw)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_point(aes(color = signif), alpha = 0.6, size = 2) +
-  scale_color_manual(values = c("grey70", "firebrick")) +
-  geom_text_repel(
-    data = top_hits,
-    aes(label = Genus),
-    size = 3,
-    box.padding = 0.3,
-    point.padding = 0.2,
-    max.overlaps = 10
-  ) +
+#plot
+ggplot(tax.count, aes(x = Diet, y = round(100*value, 2), fill = Diet)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  geom_jitter(width = 0.2, size = 1.5, alpha = 0.6) +
+  facet_wrap(~ Time_label, scales = "free_x") +
   labs(
-    x = "Median CLR Abundance",
-    y = "Median CLR Difference (G3 vs G4)",
-    color = "Adj. p < 0.05",
-    title = "ALDEx2 Differential Abundance"
+    title = "Relative Abundance of *Acetatifactor* by Diet",
+    y = "Relative Abundance",
+    x = "Diet"
   ) +
   theme_minimal(base_size = 14) +
-  theme(legend.position = "right")
-
-
-
-```
-
-
-let's get the taxa that are differentially abundant between groups 1 and 2
-no taxa are significant between groups 1 and 2
-```{r, fig.height=5, fig.width=5}
-# Step 1: subset samples to just the two groups
-groups_of_interest <- c("G1", "G2")
-phy_sub <- subset_samples(phy_filt, Group %in% groups_of_interest)
-phy_sub <- prune_taxa(taxa_sums(phy_sub) > 0, phy_sub)
-
-# Step 2: extract OTU table and sample data
-otu_mat_sub <- as.data.frame(otu_table(phy_sub))
-samp_sub <- as(sample_data(phy_sub), "data.frame")
-
-# Step 3: get group vector for ALDEx2
-conds <- samp_sub$Group
-
-# Step 4: run ALDEx2
-ald_sub <- aldex(
-  t(otu_mat_sub),   # transpose so features are columns
-  conds,
-  test = "t",
-  effect = TRUE,
-  denom = "all"
-)
-
-# Step 5: annotate with taxonomy
-tax_df <- as.data.frame(tax_table(phy_sub)) %>% rownames_to_column("OTU")
-
-ald_df <- as.data.frame(ald_sub) %>%
-  rownames_to_column("OTU") %>%
-  left_join(dplyr::select(tax_df, OTU, Genus), by = "OTU") %>%
-  mutate(signif = wi.eBH < 0.05)
-
-#head(ald_df)
-
-
-# Pick top 10 taxa by absolute median difference among significant hits
-top_hits <- ald_df %>%
-  filter(signif) %>%
-  slice_max(order_by = abs(diff.btw), n = 10)
-
-ggplot(ald_df, aes(x = rab.all, y = diff.btw)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_point(aes(color = signif), alpha = 0.6, size = 2) +
-  scale_color_manual(values = c("grey70", "firebrick")) +
-  geom_text_repel(
-    data = top_hits,
-    aes(label = Genus),
-    size = 3,
-    box.padding = 0.3,
-    point.padding = 0.2,
-    max.overlaps = 10
-  ) +
-  labs(
-    x = "Median CLR Abundance",
-    y = "Median CLR Difference (G3 vs G4)",
-    color = "Adj. p < 0.05",
-    title = "ALDEx2 Differential Abundance"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(legend.position = "right")
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 ```
 
@@ -1567,18 +1464,18 @@ ggplot(ald_df, aes(x = rab.all, y = diff.btw)) +
 # Compose left side: fig1A (panel a), fig1B (panel b)
 fig1_top <- ggdraw() +
   # Panel a: left column
-  draw_plot(Fig1B, x = 0, y = 0, width = 0.5, height = 1) +
-  draw_plot_label("a", x = 0.01, y = 0.98, size = 14, fontface = "bold") +
+  draw_plot(gig1B, x = 0, y = 0, width = 0.5, height = 1) +
+  draw_plot_label("B", x = 0.01, y = 0.98, size = 14, fontface = "bold") +
 
   # Panel b: right column
   draw_plot(Fig1C, x = 0.5, y = 0, width = 0.5, height = 1) +
-  draw_plot_label("b", x = 0.51, y = 0.98, size = 14, fontface = "bold")
+  draw_plot_label("C", x = 0.51, y = 0.98, size = 14, fontface = "bold")
 
 
 fig1_bottom <- ggdraw() +
   # Panel c: left column
   draw_plot(fig1D, x = 0, y = 0, width = 0.5, height = 1) +
-  draw_plot_label("c", x = 0.01, y = 0.98, size = 14, fontface = "bold") +
+  draw_plot_label("D", x = 0.01, y = 0.98, size = 14, fontface = "bold") +
 
   # Panel d: right column
   draw_plot(fig1E, x = 0.5, y = 0, width = 0.5, height = 1) +
