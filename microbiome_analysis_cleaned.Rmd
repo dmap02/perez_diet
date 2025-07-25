@@ -138,7 +138,7 @@ sample_data(ps) <- sample_data(map)
 
 # Let's look at stacked bar plots
 we will look at these plots a few ways. in the first iteration, we will look at the data with the x axis ordered by cage number and then mouse number 1:2
-```{r, fig.height=10, fig.width=12}
+```{r}
 # Transform to relative abundance
 ps_relabund <- transform_sample_counts(ps, function(x) x / sum(x))
 
@@ -197,7 +197,7 @@ df_long$Plot_factor = paste0(df_long$Cage, ";", df_long$Day, ";", df_long$Mouse)
 lets look to see if sequencing depth differs between fatty acid and control
 
 we can see that the time point 1 samples have less reads than the other time points, though this difference is only marginally significant. 
-```{r, fig.height=5}
+```{r, fig.height=5, fig.width=6}
 df = data.frame(Depth = sample_sums(ps), sample_data(ps))
 df$My.group = ifelse(df$Group %in% c("G1", "G2"), "pre", "post")
 df$Time_label = factor(df$Time_label, levels=c("T1", "T2", "T3"))
@@ -208,7 +208,7 @@ p
 ```
 
 if we drop the day -8 samples than this difference goes away. there is no significant difference between sequencing depth of the pre and post samples for the diet comparisons.
-```{r}
+```{r, fig.height=4, fig.width=8}
 df1 = subset(df, Day != "-8")
 df1$Time_label = factor(df1$Time_label, levels=c("T1", "T2", "T3"))
 
@@ -220,7 +220,7 @@ grid.arrange(pa, pb, pc, ncol=3)
 
 
 now let's look at this instead based on the relative abundance of taxa later identified as differentiating days and by diet
-```{r, fig.height=12}
+```{r, fig.height=10}
 #re order based on relative abundance of lactobacillus, bacteroides and Barnesiella
 target_genera <- c("Lactobacillus", "Bacteroides", "Barnesiella")
 
@@ -276,7 +276,7 @@ The FattyAcid group exhibited a universal trend toward reduced richness and dive
 
 
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=8, fig.height=4}
 phy <- readRDS("~/Desktop/perez/PerezDiet_merged_Len250_EE5_5_RefSeq.rds")
 
 #update the metadata with cage information
@@ -398,7 +398,6 @@ plot_diversity_metric <- function(data, pval_data, diversity_metric, time_colors
     strip.text.y = element_blank()  # 👈 Hides the facet strip label on the right
   )
   }
-plot_diversity_metric(df2, within_diet_pvals2, "Shannon", time_colors)
 SFig1A = plot_diversity_metric(df2, within_diet_pvals2, "Observed", time_colors)
 SFig1B = plot_diversity_metric(df2, within_diet_pvals2, "Simpson", time_colors)
 SFig1C = plot_diversity_metric(df2, within_diet_pvals2, "Chao1", time_colors)
@@ -632,7 +631,7 @@ plot(bd)
 ```
 
 what happens when we drop the pre samples? when we drop the pre samples, then time is not significant. diet is significant, and the time x diet interaction is significant. 
-```{r, fig.height=4, fig.width=8}
+```{r, fig.height=5, fig.width=6}
 myphy = subset_samples(phy_filt, Main.Factor != "pre") %>%
   prune_taxa(taxa_sums(.) > 0, .)
 
@@ -1268,17 +1267,13 @@ ps_subset <- subset_taxa(phy_filt, Genus %in% c("Lactobacillus", "Bacteroides",
                                                 "Barnesiella", "Turicibacter",
                                                 "Prevotella", "Clostridium XlVa"))
 
-# Transform to relative abundance
+# Transform to relative abundance or clr
 ps_rel <- transform_sample_counts(ps_subset, function(x) x / sum(x))
 
-# Melt to long format for ggplot
+# Melt to long format for ggplot and clean up
 ps_melt <- psmelt(ps_rel)
-
-# Optional: clean up Genus names if needed
 ps_melt$Genus <- as.character(ps_melt$Genus)
 ps_melt$Genus[is.na(ps_melt$Genus)] <- "Unclassified"
-
-
 ps_melt$Time_label = factor(ps_melt$Time_label, levels=c("T1", "T2", "T3"))
 
 #subset on taxa
@@ -1337,15 +1332,14 @@ plot_my_taxa <- function(df, species) {
     )
 }
 
-
+#we drop clostridium because nothing is significant when we clr transform
 fig1d1 <- plot_my_taxa(Lactobacillus, species="Lactobacillus") + ylim(0, 0.9)
 fig1d2 <- plot_my_taxa(Bacteroides, species="Bacteroides")+ ylim(0, 0.9)
 fig1d3 <- plot_my_taxa(Barnesiella, species="Barnesiella")+ ylim(0, 0.9)
 fig1d4 <- plot_my_taxa(Turicibacter, species="Turicibacter") + ylim(0, 0.4)
-fig1d5 <- plot_my_taxa(Clostridium, species="Clostridium XlVa")+ ylim(0, 0.4)
 fig1d6 <- plot_my_taxa(Prevotella, species="Prevotella")+ ylim(0, 0.4)
 
-fig1D <- plot_grid(fig1d1, fig1d2, fig1d3, fig1d4, fig1d5, fig1d6, 
+fig1D <- plot_grid(fig1d1, fig1d2, fig1d3, fig1d4,fig1d6, 
                    ncol = 2, align = "hv")  
 
 fig1D
@@ -1356,6 +1350,37 @@ ggsave(fig1D, file="~/Desktop/github/perez_diet/fig1D.pdf", device="pdf", height
 ggsave(fig1D, file="~/Desktop/github/perez_diet/fig1D.eps", device="eps", height = 12, width = 7)
 
 ```
+
+let's make sure that these effects persist with the clr transformation
+
+- when we clr transform, the hoa effect for barnsiella is not significant. clostridium is not signifcant under either condition, so we will drop it. 
+```{r}
+#do clr and then melt
+ps_clr <- transform_sample_counts(ps_subset, function(x) compositions::clr(x))
+ps_melt <- psmelt(ps_clr)
+ps_melt$Genus <- as.character(ps_melt$Genus)
+ps_melt$Genus[is.na(ps_melt$Genus)] <- "Unclassified"
+ps_melt$Time_label = factor(ps_melt$Time_label, levels=c("T1", "T2", "T3"))
+
+#subset on taxa
+Turicibacter = subset(ps_melt, Genus=="Turicibacter")
+Bacteroides = subset(ps_melt, Genus=="Bacteroides")
+Lactobacillus = subset(ps_melt, Genus=="Lactobacillus")
+Barnesiella = subset(ps_melt, Genus=="Barnesiella")
+Prevotella = subset(ps_melt, Genus=="Prevotella")
+Clostridium = subset(ps_melt, Genus=="Clostridium XlVa")
+
+fig1d1a <- plot_my_taxa(Lactobacillus, species="Lactobacillus") 
+fig1d2a <- plot_my_taxa(Bacteroides, species="Bacteroides")
+fig1d3a <- plot_my_taxa(Barnesiella, species="Barnesiella")
+fig1d4a <- plot_my_taxa(Turicibacter, species="Turicibacter") 
+fig1d6a <- plot_my_taxa(Prevotella, species="Prevotella")
+
+fig1Da <- plot_grid(fig1d1a, fig1d2a, fig1d3a, fig1d4a,  fig1d6a, 
+                   ncol = 2, align = "hv")  
+
+```
+
 
 ### Let's look at T1 vs T1, T2 vs T2, etc. with aldex
 ```{r, fig.height=5, fig.width=5}
