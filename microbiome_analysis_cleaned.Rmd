@@ -1228,8 +1228,8 @@ db2 = ggplot(top_taxa_CAP2, aes(x = reorder(Genus, CAP2), y = CAP2)) +
 
 grid.arrange(db1, db2, ncol=2)
 
-SFig2 = plot_grid(db1, db2, ncol=2, labels = c("a", "b"))
-ggsave(SFig1, file="~/Desktop/github/perez_diet/SFig2.pdf", device = pdf, width = 12, height = 8)
+SFig2 = plot_grid(db1, db2, ncol=2, labels = c("A", "B"))
+ggsave(SFig2, file="~/Desktop/github/perez_diet/SFig2.pdf", device = pdf, width = 12, height = 8)
 ```
 
 
