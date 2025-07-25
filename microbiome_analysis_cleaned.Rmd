@@ -395,7 +395,7 @@ plot_diversity_metric <- function(data, pval_data, diversity_metric, time_colors
   theme(
     legend.position = "none",
     plot.title = element_text(face = "italic", hjust = 0.5),
-    strip.text.y = element_blank()  # 👈 Hides the facet strip label on the right
+    strip.text.y = element_blank() 
   )
   }
 SFig1A = plot_diversity_metric(df2, within_diet_pvals2, "Observed", time_colors)
@@ -694,20 +694,22 @@ UniFrac.df$Time_label <- factor(UniFrac.df$Time_label, levels = c("T1", "T2", "T
 
 
 # Boxplot of Axis.1 by Time_label, filled by Main.Factor, faceted by Diet
-p1 <- ggplot(UniFrac.df, aes(x = Time_label, y = Axis.1, fill = Main.Factor)) +
-  geom_boxplot() +
+p1 <- ggplot(UniFrac.df, aes(x = Time_label, y = Axis.1, fill = Time_label)) +
+  geom_boxplot(alpha=0.8) +
   facet_wrap(~ Diet) +
   stat_compare_means() +
   theme(legend.position = "none") +
-  ylab(paste0("Axis 1: ", round(eig[1], 2), "%")) + xlab("")
+  ylab(paste0("Axis 1: ", round(eig[1], 2), "%")) + xlab("") +
+  scale_fill_manual(values=my_colors)
 
 # Boxplot of Axis.2 by Time_label, filled by Main.Factor, faceted by Diet
-p2 <- ggplot(UniFrac.df, aes(x = Time_label, y = Axis.2, fill = Main.Factor)) +
-  geom_boxplot() +
+p2 <- ggplot(UniFrac.df, aes(x = Time_label, y = Axis.2, fill = Time_label)) +
+  geom_boxplot(alpha=0.8) +
   facet_wrap(~ Diet) +
   stat_compare_means() +
   theme(legend.position = "none") +
- ylab(paste0("Axis 2: ", round(eig[2], 2), "%")) + xlab("")
+  ylab(paste0("Axis 2: ", round(eig[2], 2), "%")) + xlab("") +
+  scale_fill_manual(values=my_colors)
 
 # Arrange plots vertically
 gridExtra::grid.arrange(p1, p2, ncol = 1)
@@ -716,10 +718,11 @@ gridExtra::grid.arrange(p1, p2, ncol = 1)
 
 
 # Taxa Correlation with Unifrac Ordination Axes
-To identify which taxa may be driving the patterns observed in the ordination, we examined correlations between species abundances and the ordination axes. Specifically, we applied a centered log-ratio (CLR) transformation to the abundance data to account for compositionality, and then performed linear regressions of each taxon's CLR-transformed abundance against Axis 1 and Axis 2 scores independently.
+To identify taxa potentially driving the patterns observed in the ordination, we examined correlations between species abundances and the first two ordination axes. Abundance data were first transformed using the centered log-ratio (CLR) method to address compositionality. We then performed separate linear regressions of each taxon's CLR-transformed abundance against Axis 1 and Axis 2 scores.
 
-To control for multiple testing, we applied a false discovery rate (FDR) correction with a significance threshold of 0.01. This identified 58 taxa that are significantly associated with either axis and may underlie  the observed shifts in community structure.
+To account for multiple testing, we applied a false discovery rate (FDR) correction with a significance threshold of 0.05. This analysis identified 13 taxa significantly associated with at least one axis, suggesting their potential role in the observed shifts in community structure.
 
+The taxa identified were: Bacteroides, Barnesiella, Bifidobacterium, Clostridium IV, Clostridium XIVa, Clostridium XVIII, Lactobacillus, Mucispirillum, Parabacteroides, Prevotella, Romboutsia, and Turicibacter. Among these, Lactobacillus, Barnesiella, Clostridium XIVa, and Prevotella showed the largest effect sizes.
 
 ```{r, fig.height=5, fig.width=5}
 # Prepare ordination data frame with SampleID and first two axes
@@ -780,73 +783,42 @@ ggplot(volcano_data, aes(x = estimate, y = neg_log10_padj, label=Genus)) +
   )
 
 #we see that there are 13 taxa that are significantly correlated with axis 1 or 2
-foo = subset(results_all, p.adj < 0.05)
-length(foo$Taxon)
+foo = subset(volcano_data, p.adj < 0.05)
+table(foo$Genus)
 ```
 
+Next, we want to see which of these taxa significantly differ in their distributions across time and by diet.
 
-let's filter to get significant genera and then test for explicit differences across time. this identifies 6 of the 13 taxa correlated with axis 1 and 2 as significantly variable across time
 
-Lactobacillus
+Lactobacillus: For controls, T1 vs T2 and T2 vs T3 showed significant differences. No significant differences for HOA.
 
-    HOA diet: No significant changes over time (all p.adj > 0.5).
+Clostridium XIVa: For controls, T1 vs T2 and T1 vs T3 showed significant differences. No significant differences for HOA.
 
-    Control diet: Significant changes between T1–T2 (p.adj = 0.003) and T2–T3 (p.adj = 0.018). T1–T3 not significant.
+Barnesiella: For controls, significant differences were found for T1 vs T2, T1 vs T3, and T2 vs T3. For HOA, significant differences were observed between T1 and T2, and between T1 and T3.
 
-Clostridium.XlVa
+Mucispirillum: For controls, T1 vs T2 showed a significant difference. No significant differences for HOA.
 
-    HOA diet: No significant changes (lowest p.adj = 0.085; marginal).
+Prevotella: For controls, significant differences were found between T1 and T2, and between T1 and T3. For HOA, significant differences were observed between T1 and T2, and between T1 and T3.
 
-    Control diet: Significant changes at T1–T2 (p.adj = 0.036) and T1–T3 (p.adj = 0.036). T2–T3 not significant.
+Bacteroides: For controls, significant differences were found between T1 and T2, and between T1 and T3. For HOA, significant differences were observed between T1 and T2, and between T1 and T3.
 
-Barnesiella
+Turicibacter: For controls, significant differences occurred between T1 and T3, and between T2 and T3. No significant differences for HOA.
 
-    HOA diet: Significant changes between T1–T2 (p.adj = 0.022) and T1–T3 (p.adj = 0.003). T2–T3 not significant.
+Parabacteroides: No significant differences for controls or HOA.
 
-    Control diet: Significant changes at T1–T2 (p.adj = 0.0008), T1–T3 (p.adj = 0.017), and T2–T3 (p.adj = 0.017).
+Bifidobacterium: No significant differences for controls or HOA.
 
-Mucispirillum
+Clostridium IV: No significant differences for controls or HOA.
 
-    HOA diet: No significant changes.
+Clostridium XVIII: No significant differences for controls or HOA.
 
-    Control diet: Significant change between T1–T2 (p.adj = 0.03). Others not significant.
+Romboutsia: No significant differences for controls or HOA.
 
-Prevotella
-
-    HOA diet: Significant changes at T1–T2 (p.adj = 0.002) and T1–T3 (p.adj = 0.0008). T2–T3 not significant.
-
-    Control diet: Significant changes at T1–T2 (p.adj = 0.0003) and T1–T3 (p.adj = 0.0006). T2–T3 not significant.
-
-Bacteroides
-
-    HOA diet: Significant changes between T1–T2 (p.adj = 0.025) and T1–T3 (p.adj = 0.043). T2–T3 not significant.
-
-    Control diet: Significant differences between T1–T2 (p.adj = 0.015) and T1–T3 (p.adj = 0.001). T2–T3 not significant.
-
-Turicibacter
-
-    HOA diet: No significant changes (all p.adj > 0.8).
-
-    Control diet: Significant decreases between T1–T3 (p.adj = 0.003) and T2–T3 (p.adj = 0.022).
-
-Parabacteroides
-
-    No significant changes in either diet (all p.adj > 0.2).
-
-Bifidobacterium
-
-    No significant changes in either diet (all p.adj > 0.1).
-
-Clostridium.IV
-
-    No significant changes in either diet (all p.adj > 0.7).
-
-Clostridium.XVIII
-
-    No significant changes in either diet (all p.adj > 0.6).
 ```{r, fig.height=12}
+#get all pairwise combinations between time points
 mycomparisons <- combn(c("T1", "T2", "T3"), 2, simplify = FALSE)
 
+#specify the color palette to maintain consistency with the relative abundance plot
 mycolorpalette =c(
   "Lactobacillus" = "#aec7e8",  
   "Bacteroides" = "#2ca02c",    
@@ -868,8 +840,14 @@ sig_taxa <- results_annotated %>%
 # Ensure SampleID column exists in metadata
 metadata$SampleID <- rownames(metadata)
 
+
+# Convert clr_mat to data frame and add SampleID as column
+clr_df <- as.data.frame(clr_mat)
+clr_df$SampleID <- rownames(clr_df)
+
+
 # Convert CLR matrix to long format, filter to significant taxa, join taxonomy and metadata
-clr_long <- clr_mat %>%
+clr_long <- clr_df %>%
   pivot_longer(
     cols = -SampleID,
     names_to = "Taxon",
@@ -879,63 +857,61 @@ clr_long <- clr_mat %>%
   left_join(sig_taxa, by = "Taxon") %>%
   left_join(metadata, by = "SampleID")
 
-
 ####plot pairwise comparisons
-# ----- Step 1: Define significant genera -----
+# Define significant genera 
 keep <- unique(sig_taxa$Genus)
 
-# ----- Step 2: Normalize to relative abundance -----
+#Normalize to relative abundance
 psra <- transform_sample_counts(ps, function(x) x / sum(x))
 
-# ----- Step 3: Extract taxonomy and rename taxa to Genus -----
+# xtract taxonomy and rename taxa to Genus
 tax <- as.data.frame(tax_table(psra))
 taxa_names(psra) <- tax$Genus
 
-# ----- Step 4: Subset phyloseq to only the significant genera -----
+# Subset phyloseq to only the significant genera 
 psra_keep <- subset_taxa(psra, Genus %in% keep)
 
-# ----- Step 5: Melt the phyloseq object to a data frame -----
+#  Melt the phyloseq object to a data frame
 df <- data.frame(otu_table(psra_keep), sample_data(psra_keep)) %>%
   reshape2::melt(., colnames(sample_data(psra_keep)))
 
-# ----- Step 6: Clean up -----
+#  Clean up 
 df$Time_label <- factor(df$Time_label, levels = c("T1", "T2", "T3"))
 df <- df %>% dplyr::rename(Genus = variable)
 
-# ----- Step 7: Wilcoxon tests with multiple comparisons correction -----
-pval_df <- df %>%
+# wilcoxon tests with multiple comparisons correction on clr data
+pval_clr_df <- clr_long %>%
   group_by(Genus, Diet) %>%
   pairwise_wilcox_test(
-    value ~ Time_label,
+    CLR ~ Time_label,
     p.adjust.method = "BH",
     comparisons = mycomparisons
   ) %>%
   add_significance("p.adj") %>%
   add_y_position()
 
-# ----- Step 8: Plot -----
-plot_genus_pairwise <- function(genus_name, df, mycomparisons) {
-  # Filter data to the specified genus
-  df_sub <- df %>% filter(Genus == genus_name)
+# plot
+plot_genus_pairwise_clr <- function(genus_name, clr_df, mycomparisons) {
+  # Filter data for the genus
+  df_sub <- clr_df %>% filter(Genus == genus_name)
   
-  # Check if there is data for this genus
   if (nrow(df_sub) == 0) {
     stop(paste("No data found for genus:", genus_name))
   }
   
-  # Perform pairwise Wilcoxon tests for this genus grouped by Diet
+  # Pairwise Wilcoxon tests per Diet
   pval_df <- df_sub %>%
     group_by(Diet) %>%
     pairwise_wilcox_test(
-      value ~ Time_label,
+      CLR ~ Time_label,
       p.adjust.method = "BH",
       comparisons = mycomparisons
     ) %>%
     add_significance("p.adj") %>%
     add_y_position()
   
-  # Create the plot
-  p <- ggplot(df_sub, aes(x = Time_label, y = value)) +
+  # Plot CLR boxplots with points and p-values
+  p <- ggplot(df_sub, aes(x = Time_label, y = CLR)) +
     geom_boxplot(aes(fill = Time_label), outlier.shape = NA) +
     geom_point(position = position_jitter(width = 0.2), alpha = 0.5, size = 1.5) +
     facet_wrap(~Diet, scales = "free_y") +
@@ -947,29 +923,32 @@ plot_genus_pairwise <- function(genus_name, df, mycomparisons) {
     ) +
     theme_minimal(base_size = 13) +
     theme(legend.position = "none") +
-    scale_fill_brewer(palette = "Set2") +
+    scale_fill_manual(values = my_colors) +
     labs(
-      title = paste(genus_name),
-      y = "Relative Abundance",
+      title = genus_name,
+      y = "CLR-transformed abundance",
       x = "Time Label"
     )
   
   return(p)
 }
+
+#define the list of comparisons
 mygenera = sig_taxa$Genus
 
-p1  = plot_genus_pairwise(mygenera[1], df, mycomparisons)   # Lactobacillus
-p2  = plot_genus_pairwise("Clostridium.XlVa", df, mycomparisons)
-p3  = plot_genus_pairwise(mygenera[3], df, mycomparisons)   # Barnesiella
-p4  = plot_genus_pairwise(mygenera[4], df, mycomparisons)
-p5  = plot_genus_pairwise(mygenera[5], df, mycomparisons)   # Prevotella
-p6  = plot_genus_pairwise(mygenera[6], df, mycomparisons)
-p7  = plot_genus_pairwise(mygenera[7], df, mycomparisons)
-p8  = plot_genus_pairwise(mygenera[8], df, mycomparisons)
-p9  = plot_genus_pairwise(mygenera[9], df, mycomparisons)
-p10 = plot_genus_pairwise("Clostridium.IV", df, mycomparisons)
-p11 = plot_genus_pairwise(mygenera[11], df, mycomparisons)
-p12 = plot_genus_pairwise("Clostridium.XVIII", df, mycomparisons)
+#make the plots
+p1  = plot_genus_pairwise_clr(mygenera[1], clr_long, mycomparisons)   # Lactobacillus
+p2  = plot_genus_pairwise_clr(mygenera[2], clr_long, mycomparisons)
+p3  = plot_genus_pairwise_clr(mygenera[3], clr_long, mycomparisons)   # Barnesiella
+p4  = plot_genus_pairwise_clr(mygenera[4], clr_long, mycomparisons)
+p5  = plot_genus_pairwise_clr(mygenera[5], clr_long, mycomparisons)   # Prevotella
+p6  = plot_genus_pairwise_clr(mygenera[6], clr_long, mycomparisons)
+p7  = plot_genus_pairwise_clr(mygenera[7], clr_long, mycomparisons)
+p8  = plot_genus_pairwise_clr(mygenera[8], clr_long, mycomparisons)
+p9  = plot_genus_pairwise_clr(mygenera[9], clr_long, mycomparisons)
+p10 = plot_genus_pairwise_clr(mygenera[10], clr_long, mycomparisons)
+p11 = plot_genus_pairwise_clr(mygenera[11], clr_long, mycomparisons)
+p12 = plot_genus_pairwise_clr(mygenera[12], clr_long, mycomparisons)
 
 
 myplot = cowplot::plot_grid(p1, p2, p3, p5, p7, p8, p11, ncol=2)
@@ -978,77 +957,73 @@ myplot
 
 let's look at whether we see a difference between T1 vs T1, T2 vs T2, T3 vs T3 by diet
 
-4 genera showed significant differences in relative abundance between the control (AIN-93G) and HOA diets. At T2, Mucispirillum was significantly more abundant in the control group compared to the HOA group (p.adj = 0.012), and Romboutsia also showed a significant difference favoring the control diet (p.adj = 0.039). However, it's important to note that these taxa are present at less than. 0.1 relative abundance, so this could just be noise. At T1, Barnesiella exhibited higher abundance in the HOA group (p.adj = 0.033), indicating an early diet effect, which may have influenced the trajectory of outcomes. Finally, at T3, Turicibacter was significantly more abundant in the HOA group than the control (p.adj = 0.033).
-```{r}
-# Ensure Time_label is a factor
-df$Time_label <- factor(df$Time_label, levels = c("T1", "T2", "T3"))
+Four genera showed significant differences in relative abundance between the control (AIN-93G) and HOA diets. At T3, Turicibacter was significantly more abundant in the HOA group than in the control group (p.adj = 0.033). Clostridium XVIII was also significantly more abundant in the control group than HOA at T3. At T2, Mucispirillum was significantly more abundant in the control group (p.adj = 0.012), and Romboutsia also showed a significant difference favoring the control diet (p.adj = 0.039). However, it’s important to note that Mucispirillum and Romboutsia are present at less than 0.1% relative abundance, so these differences may reflect noise rather than biologically meaningful effects.
 
-# Step 1: Run pairwise Wilcoxon tests by Genus and Time
-diet_diff_results <- df %>%
+```{r}
+library(dplyr)
+library(rstatix)
+
+# Ensure Time_label is a factor with correct levels
+clr_long$Time_label <- factor(clr_long$Time_label, levels = c("T1", "T2", "T3"))
+
+# Run pairwise Wilcoxon tests comparing Diet within each Genus and Time_label
+pval_clr_df <- clr_long %>%
   group_by(Genus, Time_label) %>%
   pairwise_wilcox_test(
-    value ~ Diet,
+    CLR ~ Diet,
     p.adjust.method = "BH"
   ) %>%
-  add_significance("p.adj")
+  add_significance("p.adj") %>%
+  add_y_position()
 
-# Step 2: Filter for significant genera
-significant_genera <- diet_diff_results %>%
-  filter(p.adj < 0.05) %>%
-  pull(Genus) %>%
-  unique()
 
-# Step 3: Merge p-values with df for plotting
-df_plot <- df %>%
-  left_join(diet_diff_results, by = c("Genus", "Time_label"))
 
-# Step 4: Define plotting function
-plot_genus_diet_comparison <- function(genus_name, df_plot) {
-  df_sub <- df_plot %>% filter(Genus == genus_name)
+# Ensure Time_label is a factor with correct levels
+clr_long$Time_label <- factor(clr_long$Time_label, levels = c("T1", "T2", "T3"))
 
-  if (nrow(df_sub) == 0) {
-    stop(paste("No data found for genus:", genus_name))
-  }
+# Run pairwise Wilcoxon tests comparing Diet within each Genus and Time_label
+pval_clr_df <- clr_long %>%
+  group_by(Genus, Time_label) %>%
+  pairwise_wilcox_test(
+    CLR ~ Diet,
+    p.adjust.method = "BH"
+  ) %>%
+  add_significance("p.adj") %>%
+  add_y_position()
 
-  # p-value annotations per Time_label
-  pval_df <- df_sub %>%
-    dplyr::select(Time_label, p.adj, p.adj.signif) %>%
-    distinct() %>%
-    drop_na(p.adj) %>%
-    mutate(
-      group1 = "HOA",
-      group2 = "control (AIN-93G)",
-      y.position = max(df_sub$value, na.rm = TRUE) * 1.1
-    )
 
-  ggplot(df_sub, aes(x = Diet, y = value)) +
-    geom_boxplot(aes(fill = Diet), outlier.shape = NA) +
-    geom_point(position = position_jitter(width = 0.2), alpha = 0.5, size = 1.5) +
+unique_genera <- unique(clr_long$Genus)
+plot_genus_diet_clr <- function(genus_name, clr_long, pval_df) {
+  df_sub <- clr_long %>% filter(Genus == genus_name)
+  pval_sub <- pval_df %>% filter(Genus == genus_name)
+  
+  ggplot(df_sub, aes(x = Diet, y = CLR, fill = Diet)) +
+    geom_boxplot(outlier.shape = NA) +
+    geom_jitter(width = 0.2, alpha = 0.5, size = 1.5) +
     facet_wrap(~Time_label, scales = "free_y") +
     stat_pvalue_manual(
-      pval_df,
+      pval_sub,
       label = "p.adj.signif",
       tip.length = 0.01,
-      size = 4
+      size = 4,
+      bracket.size = 0.5
     ) +
+    scale_fill_manual(values = c("HOA" = "#1f77b4", "control (AIN-93G)" = "#ff7f0e")) +
     theme_minimal(base_size = 13) +
     theme(legend.position = "none") +
-    scale_fill_manual(values = c("HOA" = "#1f77b4", "control (AIN-93G)" = "#ff7f0e")) +
     labs(
       title = paste0("*", genus_name, "*"),
-      y = "Relative Abundance",
+      y = "CLR-transformed abundance",
       x = "Diet"
     ) +
     theme(plot.title = element_markdown(size = 14))
 }
-
-# Step 5: Generate plots for all significant genera
-plot_list <- lapply(significant_genera, function(genus) {
-  plot_genus_diet_comparison(genus, df_plot)
+plots <- lapply(unique_genera, function(genus) {
+  plot_genus_diet_clr(genus, clr_long, pval_clr_df)
 })
 
-# Step 6: Combine all plots
-cowplot::plot_grid(plotlist = plot_list, ncol = 2)
+cowplot::plot_grid(plotlist = plots[8:11])
+
 ```
 
 
@@ -1200,7 +1175,9 @@ plot_day <- plot_group_boxplot(
 
 ```
 
-let's identify taxa that are driving the segregation of samples along axis 1 and 2
+let's identify taxa that are driving the segregation of samples along axis 1 and 2. Importantly, we see many of the same species that were identified by unifrac correlation analysis. We will plot them on the relative abundance scale, rather than clr, so that it's more interpretable.
+
+
 ```{r, fig.height=8, fig.width=12}
 # Extract species scores from db-RDA
 taxon_scores <- scores(db_rda, display = "species")
@@ -1458,7 +1435,7 @@ p_T2
 ```
 
 let's plot the relative abundnace of Acetatifactor
-```{r}
+```{r, fig.width=5, fig.height=5}
 phy_filt_ra = transform_sample_counts(phy_filt, function(x) x/sum(x))
 phy_acetatifactor <- subset_taxa(phy_filt_ra, Genus == "Acetatifactor") 
 
