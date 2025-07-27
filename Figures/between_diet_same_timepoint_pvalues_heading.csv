@@ -1,0 +1,17 @@
+Table X. Pairwise Wilcoxon rank-sum test results comparing alpha diversity metrics between diet groups (HOA vs. control) at each time point.,,,,,,
+Time_label,diversity_measure,group1,group2,p,p.adj,p.adj.signif
+T1,Observed,control (AIN-93G),HOA,0.443,0.443,ns
+T2,Observed,control (AIN-93G),HOA,0.266,0.399,ns
+T3,Observed,control (AIN-93G),HOA,0.0449,0.1347,ns
+T1,Chao1,control (AIN-93G),HOA,0.443,0.443,ns
+T2,Chao1,control (AIN-93G),HOA,0.266,0.399,ns
+T3,Chao1,control (AIN-93G),HOA,0.0449,0.1347,ns
+T1,Shannon,control (AIN-93G),HOA,0.514,0.514,ns
+T2,Shannon,control (AIN-93G),HOA,0.128,0.297,ns
+T3,Shannon,control (AIN-93G),HOA,0.198,0.297,ns
+T1,Simpson,control (AIN-93G),HOA,0.551,0.551,ns
+T2,Simpson,control (AIN-93G),HOA,0.16,0.48,ns
+T3,Simpson,control (AIN-93G),HOA,0.41,0.551,ns
+,,,,,,
+,,,,,,
+Wilcoxon tests were conducted for each diversity metric at each time point to assess differences between diet groups. P-values were adjusted for multiple comparisons across diversity metrics using the Benjamini–Hochberg (BH) method,,,,,,

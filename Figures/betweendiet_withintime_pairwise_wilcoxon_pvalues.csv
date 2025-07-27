@@ -1,0 +1,19 @@
+"Genus","Time_label","group1","group2","p","p.adj","p.adj.signif","statistic"
+"Bacteroides","T1","control (AIN-93G)","HOA",0.713,0.713,"ns",65
+"Bacteroides","T2","control (AIN-93G)","HOA",0.63,0.63,"ns",63
+"Bacteroides","T3","control (AIN-93G)","HOA",0.41,0.41,"ns",87
+"Barnesiella","T1","control (AIN-93G)","HOA",0.114,0.114,"ns",100
+"Barnesiella","T2","control (AIN-93G)","HOA",0.198,0.198,"ns",49
+"Barnesiella","T3","control (AIN-93G)","HOA",0.755,0.755,"ns",78
+"Clostridium XlVa","T1","control (AIN-93G)","HOA",0.932,0.932,"ns",70
+"Clostridium XlVa","T2","control (AIN-93G)","HOA",0.219,0.219,"ns",50
+"Clostridium XlVa","T3","control (AIN-93G)","HOA",0.178,0.178,"ns",48
+"Lactobacillus","T1","control (AIN-93G)","HOA",0.41,0.41,"ns",57
+"Lactobacillus","T2","control (AIN-93G)","HOA",0.198,0.198,"ns",95
+"Lactobacillus","T3","control (AIN-93G)","HOA",0.319,0.319,"ns",54
+"Prevotella","T1","control (AIN-93G)","HOA",0.671,0.671,"ns",80
+"Prevotella","T2","control (AIN-93G)","HOA",0.178,0.178,"ns",48
+"Prevotella","T3","control (AIN-93G)","HOA",0.178,0.178,"ns",48
+"Turicibacter","T1","control (AIN-93G)","HOA",0.347,0.347,"ns",55
+"Turicibacter","T2","control (AIN-93G)","HOA",0.478,0.478,"ns",85
+"Turicibacter","T3","control (AIN-93G)","HOA",0.024,0.024,"*",111

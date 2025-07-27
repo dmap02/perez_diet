@@ -1,0 +1,20 @@
+Table: Pairwise Wilcoxon rank-sum test comparing CLR-transformed genus-level abundances between diet groups (HOA vs. control) within each time point. P-values were adjusted for multiple comparisons using the Benjamini–Hochberg (BH) method. Only genus-timepoint combinations with available data are included.,,,,,,
+Genus,Time_label,group1,group2,p,p.adj,p.adj.signif
+Bacteroides,T1,control (AIN-93G),HOA,0.713,0.713,ns
+Bacteroides,T2,control (AIN-93G),HOA,0.63,0.63,ns
+Bacteroides,T3,control (AIN-93G),HOA,0.41,0.41,ns
+Barnesiella,T1,control (AIN-93G),HOA,0.114,0.114,ns
+Barnesiella,T2,control (AIN-93G),HOA,0.198,0.198,ns
+Barnesiella,T3,control (AIN-93G),HOA,0.755,0.755,ns
+Clostridium XlVa,T1,control (AIN-93G),HOA,0.932,0.932,ns
+Clostridium XlVa,T2,control (AIN-93G),HOA,0.219,0.219,ns
+Clostridium XlVa,T3,control (AIN-93G),HOA,0.178,0.178,ns
+Lactobacillus,T1,control (AIN-93G),HOA,0.41,0.41,ns
+Lactobacillus,T2,control (AIN-93G),HOA,0.198,0.198,ns
+Lactobacillus,T3,control (AIN-93G),HOA,0.319,0.319,ns
+Prevotella,T1,control (AIN-93G),HOA,0.671,0.671,ns
+Prevotella,T2,control (AIN-93G),HOA,0.178,0.178,ns
+Prevotella,T3,control (AIN-93G),HOA,0.178,0.178,ns
+Turicibacter,T1,control (AIN-93G),HOA,0.347,0.347,ns
+Turicibacter,T2,control (AIN-93G),HOA,0.478,0.478,ns
+Turicibacter,T3,control (AIN-93G),HOA,0.024,0.024,*

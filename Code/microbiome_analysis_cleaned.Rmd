@@ -260,8 +260,8 @@ fig1D <- ggplot(df_long_annotated, aes(x = Myorder, y = Abundance, fill = Genus)
   facet_wrap(~ Time_label + Diet, scales = "free_x", ncol = 2)
 fig1D
 #save the figures
-ggsave(fig1D, file="~/Desktop/github/perez_diet/fig1D.pdf", device="pdf", width=7, height=10)
-ggsave(fig1D, file="~/Desktop/github/perez_diet/fig1D.eps", device="eps", width=6, height = 10)
+ggsave(fig1D, file="~/Desktop/github/perez_diet/Figures/fig1D.pdf", device="pdf", width=7, height=10)
+ggsave(fig1D, file="~/Desktop/github/perez_diet/Figures/fig1D.eps", device="eps", width=6, height = 10)
 ```
 
 
@@ -340,7 +340,6 @@ between_diet_pvals <- df2 %>%
   # Specify the data and formula here:
   add_y_position(data = df2, formula = value ~ Diet) %>%
   dplyr::select(c("Time_label", "diversity_measure", "group1", "group2", "p", "p.adj", "p.adj.signif"))
-write.csv(between_diet_pvals, file="~/Desktop/github/perez_diet/between_diet_same_timepoint_pvalues.csv")
 
 # ----- 4. Plot -----
 within_diet_pvals2 <- within_diet_pvals %>%
@@ -380,7 +379,7 @@ plot_diversity_metric <- function(data, pval_data, diversity_metric, time_colors
     geom_beeswarm(dodge.width = 0.8, cex = 1) +
     stat_pvalue_manual(
       pval_sub,
-      label = "p.adj.signif",
+      label = "p.adj",
       tip.length = 0.01,
       bracket.size = 0.4,
       size = 3
@@ -404,7 +403,7 @@ SFig1C = plot_diversity_metric(df2, within_diet_pvals2, "Chao1", time_colors)
 
 SFig1 = cowplot::plot_grid(SFig1A, SFig1B, SFig1C, ncol=1, labels=c("A", "B", "C"))
 SFig1
-ggsave(SFig1, file="~/Desktop/github/perez_diet/SFig1.pdf", device="pdf", width = 6, height = 11)
+ggsave(SFig1, file="~/Desktop/github/perez_diet/Figures/SFig1.pdf", device="pdf", width = 6, height = 11)
 ```
 
 
@@ -414,8 +413,8 @@ Let's look at Shannon Diversity
 ```{r, fig.height=4, fig.width=4}
 fig1B = plot_diversity_metric(df2, within_diet_pvals2, "Shannon", time_colors)
 fig1B
-ggsave(fig1B, file="~/Desktop/github/perez_diet/fig1B.pdf", device="pdf", width = 6, height = 6)
-ggsave(fig1B, file="~/Desktop/github/perez_diet/fig1B.eps", device="eps", width = 6, height = 6)
+ggsave(fig1B, file="~/Desktop/github/perez_diet/Figures/fig1B.pdf", device="pdf", width = 6, height = 6)
+ggsave(fig1B, file="~/Desktop/github/perez_diet/Figures/fig1B.eps", device="eps", width = 6, height = 6)
 
 ```
 
@@ -606,7 +605,7 @@ Fig1C <- ggplot(df, aes(x = Axis.1, y = Axis.2, shape = Diet, color = Time_label
 
 
 print(Fig1C)
-ggsave(Fig1C, file="~/Desktop/github/perez_diet/Fig1C.pdf", device="pdf", width = 8, height = 6)
+ggsave(Fig1C, file="~/Desktop/github/perez_diet/Figures/Fig1C.pdf", device="pdf", width = 8, height = 6)
 ```
 
 let's use a permutational analysis of variance to test for significance
@@ -988,17 +987,9 @@ db2 = ggplot(top_taxa_CAP2, aes(x = reorder(Genus, CAP2), y = CAP2)) +
 grid.arrange(db1, db2, ncol=2)
 
 SFig2 = plot_grid(db1, db2, ncol=2, labels = c("A", "B"))
-ggsave(SFig2, file="~/Desktop/github/perez_diet/SFig2.pdf", device = pdf, width = 12, height = 8)
+ggsave(SFig2, file="~/Desktop/github/perez_diet/Figures/SFig2.pdf", device = pdf, width = 12, height = 8)
 ```
-
-
-
-let's plot relative abundance of taxa associated with CAP1 and CAP 2. Notably, many of the taxa identified by correlation with Unifrac analysis above were identified in this analysis. 
-
-
-
-```{r, fig.width=12, fig.height=10}
-
+```{r}
 # Subset to Lactobacillus and Bacteroides
 ps_subset <- subset_taxa(phy_filt, Genus %in% c("Lactobacillus", "Bacteroides", 
                                                 "Barnesiella", "Turicibacter",
@@ -1063,7 +1054,7 @@ plot_my_taxa <- function(df, species) {
     ggtitle(species) +
     stat_pvalue_manual(
       pval_df,
-      label = "p.adj.signif",
+      label = "p.adj",
       tip.length = 0.01,
       size = 3
     )
@@ -1084,8 +1075,8 @@ fig1E
 
 save figure 1e
 ```{r, fig.height=5, fig.width=5}
-ggsave(fig1E, file="~/Desktop/github/perez_diet/fig1E.pdf", device="pdf", height = 12, width = 7)
-ggsave(fig1E, file="~/Desktop/github/perez_diet/fig1E.eps", device="eps", height = 12, width = 7)
+ggsave(fig1E, file="~/Desktop/github/perez_diet/Figures/fig1E.pdf", device="pdf", height = 12, width = 7)
+ggsave(fig1E, file="~/Desktop/github/perez_diet/Figures/fig1E.eps", device="eps", height = 12, width = 7)
 
 ```
 
@@ -1213,6 +1204,13 @@ plots <- lapply(target_genera, function(genus) {
 # Display plots in a grid
 cowplot::plot_grid(plotlist = plots, ncol = 3)
 
+#write the p values
+pval_df_flat <- pval_clr_df %>%
+  dplyr::select(Genus, Time_label, group1, group2, p, p.adj, p.adj.signif, statistic)
+pval_df_flat <- as.data.frame(pval_df_flat)
+
+# Write to CSV
+write.csv(pval_df_flat, file = "~/Desktop/github/perez_diet/Figures/betweendiet_withintime_pairwise_wilcoxon_pvalues.csv", row.names = FALSE)
 ```
 
 
@@ -1350,7 +1348,7 @@ Fig1 <- plot_grid(
 # Print
 print(Fig1)
 
-ggsave(Fig1, file="~/Desktop/github/perez_diet/Figure1.pdf", width = 11, height = 12)
+ggsave(Fig1, file="~/Desktop/github/perez_diet/Figures/Figure1.pdf", width = 11, height = 12)
 ```
 
 
