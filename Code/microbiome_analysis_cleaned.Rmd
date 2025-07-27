@@ -1183,14 +1183,18 @@ plot_genus_diet_clr <- function(genus_name, clr_long, pval_df) {
       bracket.size = 0.5
     ) +
     scale_fill_manual(values = c("HOA" = "#1f77b4", "control (AIN-93G)" = "#ff7f0e")) +
-    theme_minimal(base_size = 13) +
-    theme(legend.position = "none") +
-    labs(
-      title = paste0("*", genus_name, "*"),
-      y = "CLR abundance",
-      x = "Diet"
-    ) +
-    theme(plot.title = ggtext::element_markdown(size = 14))
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none") +
+  labs(
+    title = paste0("*", genus_name, "*"),
+    y = "CLR abundance",
+    x = "Diet"
+  ) +
+  theme(
+    plot.title = ggtext::element_markdown(size = 14),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
 }
 
 # Subset to genera of interest
@@ -1203,7 +1207,7 @@ plots <- lapply(target_genera, function(genus) {
 
 # Display plots in a grid
 cowplot::plot_grid(plotlist = plots, ncol = 3)
-
+ggsave(cowplot::plot_grid(plotlist = plots, ncol = 3), file="~/Desktop/github/perez_diet/Figures/SFig3.pdf", device="pdf", width = 12, height = 8)
 #write the p values
 pval_df_flat <- pval_clr_df %>%
   dplyr::select(Genus, Time_label, group1, group2, p, p.adj, p.adj.signif, statistic)
