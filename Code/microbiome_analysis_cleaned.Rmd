@@ -1055,13 +1055,7 @@ plot_my_taxa <- function(df, species) {
     ) +
     xlab("") +
     ylab("Relative Abundance") +
-    ggtitle(species) +
-    stat_pvalue_manual(
-      pval_df,
-      label = "p.adj",
-      tip.length = 0.01,
-      size = 3
-    )
+    ggtitle(species) 
 }
 
 #we drop clostridium because nothing is significant when we clr transform
@@ -1082,6 +1076,23 @@ save figure 1e
 ggsave(fig1E, file="~/Desktop/github/perez_diet/Figures/fig1E.pdf", device="pdf", height = 12, width = 7)
 ggsave(fig1E, file="~/Desktop/github/perez_diet/Figures/fig1E.eps", device="eps", height = 12, width = 7)
 
+#save subpanels
+ggsave(fig1e1, file="~/Desktop/github/perez_diet/Figures/fig1E1.pdf", device="pdf", height = 5, width = 5)
+ggsave(fig1e1, file="~/Desktop/github/perez_diet/Figures/fig1E1.eps", device="eps", height = 5, width = 5)
+
+
+ggsave(fig1e2, file="~/Desktop/github/perez_diet/Figures/fig1E2.pdf", device="pdf", height = 5, width = 5)
+ggsave(fig1e2, file="~/Desktop/github/perez_diet/Figures/fig1E2.eps", device="eps", height = 5, width = 5)
+
+ggsave(fig1e3, file="~/Desktop/github/perez_diet/Figures/fig1E3.pdf", device="pdf", height = 5, width = 5)
+ggsave(fig1e3, file="~/Desktop/github/perez_diet/Figures/fig1E3.eps", device="eps", height = 5, width = 5)
+
+
+ggsave(fig1e4, file="~/Desktop/github/perez_diet/Figures/fig1E4.pdf", device="pdf", height = 5, width = 5)
+ggsave(fig1e4, file="~/Desktop/github/perez_diet/Figures/fig1E4.eps", device="eps", height = 5, width = 5)
+
+ggsave(fig1e6, file="~/Desktop/github/perez_diet/Figures/fig1E5.pdf", device="pdf", height = 5, width = 5)
+ggsave(fig1e6, file="~/Desktop/github/perez_diet/Figures/fig1E5.eps", device="eps", height = 5, width = 5)
 ```
 
 let's see if these differences are robust to clr transformation
