@@ -23,18 +23,22 @@ This repository contains all code, data, and documentation necessary to reproduc
 
 ## Repository Structure
 
-- `PerezDietProject/`
+- `perez_diet/`
+  - `Code` - Microbiome analysis markdown
+    - `microbiome_analysis_cleaned_files/figure-html/` - Plots
+  - `Figures/` - All figures
+  - `databases/` - GTDB and RefSeq database files
   - `data/` – Raw and processed input data
     - `raw/` - Raw reads
   - `databases/` - Databases used for taxonomy analysis
-  - `metadata/` – Sample metadata files (TSV/CSV)
-  - `rds_objects/` – Saved RDS files (DADA2, phyloseq, etc.)
-  - `tables`
+  - `metadata/` – Sample metadata file (CSV)
+  - `rds_objects/` – Saved RDS files (phyloseq objects)
+  - `tables/` - Read tracking and BLAST tables for confusion matrix
   - `rmarkdown/` – Main analysis notebooks (Rmds)
   - `scripts/` – Helper R scripts for each task
-  - `CITATIONS` - Citations for tutorials and databases
-  - `LICENSE` - MIT License
-  - `LICENSE_DATA_CC_BY_4.0` - Creative Commons Attribution 4.0 International Public License
+  - `CITATIONS.md` - Citations for tutorials and databases
+  - `LICENSE.txt` - MIT License
+  - `LICENSE_DATA_CC_BY_4.0.txt` - Creative Commons Attribution 4.0 International Public License
   - `README.md` – This file
 
 
