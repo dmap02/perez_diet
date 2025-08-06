@@ -1,0 +1,151 @@
+---
+title: "Confusion Matrix"
+author: "Cecilia Fadhel"
+date: "2025-08-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+last updated: `r format(Sys.Date(), format="%B %d %Y")`
+
+***
+
+**Manuscript Title:  Diet-responsive genetic determinants of intestinal colonization in the yeast _Candida albicans_**
+
+**Authors** Musfirat Shubaita1,2, Mazen Oneissi1, Elena Lindemann-Pérez1, Anne-Marie Krachler1,2, Cecilia Fadhel Alvarez1,2, Diana M. Proctor1,2, and J. Christian Pérez1,2*
+
+**Affiliations**
+1Department of Microbiology and Molecular Genetics, McGovern Medical School, The University of Texas Health Science Center at Houston, Houston, USA
+2Graduate School of Biomedical Sciences, The University of Texas MD Anderson Cancer Center UTHealth Houston, Houston, USA
+
+* Corresponding author	E-mail  jose.c.perez@uth.tmc.edu
+
+---
+
+Description of the dataset:
+
+This script contains the code to generate a confusion matrix and decide which data will be used for subsequent analyses: forward or merged reads. This is established based on presense and absense of genera in each data set.
+
+---
+
+First, load R packages or install, if necessary.
+```{r}
+# Manually set working directory to the repo root (modify as needed)
+setwd("..")  # Adjust as needed if Rmd is in a subdirectory
+
+# Run the following script to install and load all analysis packages
+source("scripts/install_packages.R")
+
+# Or manually install/load packages
+required_packages <- c("readxl", "dplyr", "tidyr", "VennDiagram", "phyloseq", "tibble")
+
+for (pkg in required_packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg)
+  }
+  library(pkg, character.only = TRUE)
+}
+```
+
+Load your phyloseq object (skip if already loaded)
+```{r}
+# Use load("your_phyloseq_object.RData") for an RData file  # or use readRDS("file.rds") for a phyloseq
+ps <- readRDS("rds_objects/PerezDiet_merged_Len250_EE5_5_RefSeq.rds")
+
+# Extract taxonomy table from phyloseq
+taxa <- as.data.frame(tax_table(ps))
+
+# Add sequences as a column (assumes rownames are sequences)
+taxa <- taxa %>% rownames_to_column(var = "Sequence")
+
+# Filter for rows with genus assigned
+taxa_genus <- taxa %>%
+  filter(!is.na(Genus), Genus != "") %>%
+  group_by(Genus) %>%
+  slice(1) %>%
+  ungroup()
+
+# Create table with genus and empty BLAST columns
+blast_table <- taxa_genus %>%
+  select(Sequence, Genus) %>%
+  mutate(
+    Top_BLAST_Hit = "",
+    Alternative_Hit = ""
+  )
+
+# Optional – Save initial version
+write.csv(blast_table, "empty_BLAST_table_PerezDiet_merged_Len250_EE5_5.csv", row.names = FALSE)
+
+# Manually add BLAST results (or do it outside of R and read in filled table after)
+blast_table$Top_BLAST_Hit[1] <- "Bacteroides thetaiotaomicron"
+blast_table$Alternative_Hit[1] <- "Bacteroides xylanisolvens"
+
+# Save final version
+write.csv(blast_table, "BLAST_table_PerezDiet_merged_Len250_EE5_5.csv", row.names = FALSE)
+
+# If starting from the BLAST table: Read in the Excel files (Sheet 2 has names only without percentages)
+forward_df <- read_excel("results/tables/BLAST_table_PerezDiet_forward_Len250_f5_rNULL.xlsx", sheet = 2)
+merged_df <- read_excel("results/tables/BLAST_table_PerezDiet_merged_Len250_EE5_5.xlsx", sheet = 2)
+
+# Extract genus names from BLAST columns only
+extract_blast_genera <- function(df) {
+  unique(na.omit(c(df$Top_BLAST_Hit, df$Alternative_Hit)))
+}
+
+forward_genera <- extract_blast_genera(forward_df)
+merged_genera <- extract_blast_genera(merged_df)
+
+# Create a confusion matrix (presence/absence)
+all_genera <- sort(unique(c(forward_genera, merged_genera)))
+
+confusion_matrix <- data.frame(
+  Genus = all_genera,
+  Present_in_Merged = ifelse(all_genera %in% merged_genera, "1", "0"),
+  Present_in_Forward = ifelse(all_genera %in% forward_genera, "1", "0")
+)
+
+# Map genera to OTUs (based on BLAST assignments only)
+get_blast_genus_to_otus <- function(df, dataset_label) {
+  df_long <- df %>%
+    select(Sequence, Top_BLAST_Hit, Alternative_Hit) %>%
+    pivot_longer(cols = c(Top_BLAST_Hit, Alternative_Hit),
+                 names_to = "BLAST_Type", values_to = "Genus") %>%
+    filter(!is.na(Genus)) %>%
+    distinct(Genus, Sequence)
+  
+  df_long %>%
+    group_by(Genus) %>%
+    summarise(OTUs = paste(unique(Sequence), collapse = ", "), .groups = "drop") %>%
+    rename(!!paste0(dataset_label, "_OTUs") := OTUs)
+}
+
+merged_map <- get_blast_genus_to_otus(merged_df, "Merged")
+forward_map <- get_blast_genus_to_otus(forward_df, "Forward")
+
+# Combine OTU trace info
+otu_trace_matrix <- full_join(merged_map, forward_map, by = "Genus") %>%
+  arrange(Genus)
+
+# Create Venn Diagram
+venn.plot <- draw.pairwise.venn(
+  area1 = length(merged_genera),
+  area2 = length(forward_genera),
+  cross.area = length(intersect(merged_genera, forward_genera)),
+  category = c("Merged (BLAST)", "Forward (BLAST)"),
+  fill = c("cornflowerblue", "mediumseagreen"),
+  alpha = c(0.5, 0.5),
+  cex = 1.3,
+  cat.cex = 1.2
+)
+
+# Optional: Inspect genera found only in one or both datasets
+# only_forward <- filter(confusion_matrix, Present_in_Forward == "1", Present_in_Merged == "0")
+# only_merged  <- filter(confusion_matrix, Present_in_Forward == "0", Present_in_Merged == "1")
+# in_both      <- filter(confusion_matrix, Present_in_Forward == "1", Present_in_Merged == "1")
+
+# Step 7: Optional – Export tables
+write.csv(confusion_matrix, "genus_confusion_matrix_blast_only.csv", row.names = FALSE)
+write.csv(otu_trace_matrix, "genus_to_otus_trace_blast_only.csv", row.names = FALSE)
