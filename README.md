@@ -23,7 +23,7 @@ R scripts were optimized with the help of Copilot and ChatGPT.
 
 Keywords: gut microbiome, _Candida albicans_, fatty acids, gut colonization
 
-Dietary components influence microbial composition in the digestive tract. Although often viewed as energy sources, dietary components are likely to shape microbial determinants of intestinal colonization beyond metabolism. Here, we report that a dietary long-chain fatty acid enhances the yeast Candida albicans colonization of the murine gut partly by eliciting modifications to the fungal cell surface. Mice fed an oleic acid-rich diet were readily colonized by C. albicans and exhibited higher fungal load in feces compared to rodents fed an isocaloric control diet. Surprisingly, β-oxidation, a catabolic process to break down fatty acids for energy production, was dispensable for C. albicans to colonize the high oleic acid diet-fed mice. 16S rRNA analysis detected rather modest differences in the bacterial communities between control and oleic acid-rich diets. We identified SOK1 as an oleic acid-induced kinase that dictates cell wall mannan exposure and binding to intestinal mucin under anaerobic conditions. Furthermore, oleic acid induced the expression of several C. albicans transcription factors that positively regulate intestinal colonization via remodeling of the fungal cell surface. We posit that in environments largely devoid of oxygen like the large intestine, dietary oleic acid favors a C. albicans cell surface configuration that enhances gut occupation.
+Dietary components influence microbial composition in the digestive tract. Although often viewed as energy sources, dietary components are likely to shape microbial determinants of intestinal colonization beyond metabolism. Here, we report that a dietary long-chain fatty acid enhances the yeast _Candida albicans_ colonization of the murine gut partly by eliciting modifications to the fungal cell surface. Mice fed an oleic acid-rich diet were readily colonized by _C. albicans_ and exhibited higher fungal load in feces compared to rodents fed an isocaloric control diet. Surprisingly, β-oxidation, a catabolic process to break down fatty acids for energy production, was dispensable for _C. albicans_ to colonize the high oleic acid diet-fed mice. 16S rRNA analysis detected rather modest differences in the bacterial communities between control and oleic acid-rich diets. We identified SOK1 as an oleic acid-induced kinase that dictates cell wall mannan exposure and binding to intestinal mucin under anaerobic conditions. Furthermore, oleic acid induced the expression of several _C. albicans_ transcription factors that positively regulate intestinal colonization via remodeling of the fungal cell surface. We posit that in environments largely devoid of oxygen like the large intestine, dietary oleic acid favors a _C. albicans_ cell surface configuration that enhances gut occupation.
 
 ---
 
@@ -46,9 +46,6 @@ Dietary components influence microbial composition in the digestive tract. Altho
     - `microbiome_analysis_cleaned_files/figure-html/` - Plots
   - `Figures/` - All figures
   - `databases/` - GTDB and RefSeq database files
-  - `data/` – Raw and processed input data
-    - `raw/` - Raw reads
-  - `databases/` - Databases used for taxonomy analysis
   - `metadata/` – Sample metadata file (CSV)
   - `rds_objects/` – Saved RDS files (phyloseq objects)
   - `tables/` - Read tracking and BLAST tables for confusion matrix
@@ -78,9 +75,9 @@ install.packages(c("dada2", "phyloseq", "ggplot2", "vegan", "decontam", "microbi
 
 ### Data Input
 
-Raw data location: data/raw/
+Raw data location: Raw reads of all 16S rRNA sequencing samples have been deposited in the NCBI Sequence Read Archive (SRA) and can be accessed under BioProject PRJNA1277300.
 
-Metadata file: metadata/metadata.csv
+Metadata file: metadata/updated_metadata.csv
 
 - Ensure that your files follow this naming convention:
 
@@ -104,17 +101,15 @@ rmarkdown::render("rmarkdown/"markdown_name.Rmd")
 
 ## Output
 
-- All plots and tables are saved in the results/ folder.
+- All plots and tables can be found in the figures/ and tables/ folders.
 
 - Final .rds files are in rds_objects/, including:
 
-- ps_gtdb.rds – Phyloseq object with GTDB taxonomy
+  - PerezDiet_merged_Len250_EE5_5_RefSeq.rds
 
-- ps_refseq.rds – Phyloseq object with RefSeq taxonomy
+  - PerezDiet_merged_Len250_EE5_5_RefSeq_phyGenus_tre.rds
 
-- seqtab.rds – DADA2 sequence table
-
-- taxa.rds – DADA2 taxonomy assignment
+- DADA2 sequence tables for all parameters used can be found on the tables/ folder.
 
 
 ## Dependencies
