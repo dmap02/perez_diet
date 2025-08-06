@@ -16,8 +16,8 @@ Affiliations: 1 Department of Microbiology and Molecular Genetics, McGovern Medi
 
 - *Corresponding author: Dr. J. Christian Perez
   - E-mail: jose.c.perez@uth.tmc.edu
-  - Phone: +1 (713)500-5432
-  - Fax: +1 (713)500-5499
+  - Phone: +1 (713) 500-5432
+  - Fax: +1 (713) 500-5499
                 
 Bash scripts were optimized with the help of chatGPT
 
