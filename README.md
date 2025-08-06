@@ -15,9 +15,9 @@ Affiliations: 1 Department of Microbiology and Molecular Genetics, McGovern Medi
 2 Graduate School of Biomedical Sciences, The University of Texas MD Anderson Cancer Center UTHealth Houston, Houston, USA
 
 - Correspondence: Dr. J. Christian Perez
-                E-mail: jose.c.perez@uth.tmc.edu
-                Phone: +1 (713)500-5432
-                Fax: +1 (713)500-5499
+  - E-mail: jose.c.perez@uth.tmc.edu
+  - Phone: +1 (713)500-5432
+  - Fax: +1 (713)500-5499
                 
 Bash scripts were optimized with the help of chatGPT
 
