@@ -21,7 +21,7 @@ Affiliations: 1 Department of Microbiology and Molecular Genetics, McGovern Medi
                 
 R scripts were optimized with the help of Copilot and ChatGPT.
 
-Keywords: 
+Keywords: gut microbiome, _Candida albicans_, fatty acids, gut colonization
 
 Dietary components influence microbial composition in the digestive tract. Although often viewed as energy sources, dietary components are likely to shape microbial determinants of intestinal colonization beyond metabolism. Here, we report that a dietary long-chain fatty acid enhances the yeast Candida albicans colonization of the murine gut partly by eliciting modifications to the fungal cell surface. Mice fed an oleic acid-rich diet were readily colonized by C. albicans and exhibited higher fungal load in feces compared to rodents fed an isocaloric control diet. Surprisingly, β-oxidation, a catabolic process to break down fatty acids for energy production, was dispensable for C. albicans to colonize the high oleic acid diet-fed mice. 16S rRNA analysis detected rather modest differences in the bacterial communities between control and oleic acid-rich diets. We identified SOK1 as an oleic acid-induced kinase that dictates cell wall mannan exposure and binding to intestinal mucin under anaerobic conditions. Furthermore, oleic acid induced the expression of several C. albicans transcription factors that positively regulate intestinal colonization via remodeling of the fungal cell surface. We posit that in environments largely devoid of oxygen like the large intestine, dietary oleic acid favors a C. albicans cell surface configuration that enhances gut occupation.
 
@@ -29,9 +29,9 @@ Dietary components influence microbial composition in the digestive tract. Altho
 
 ## Experimental Design
 
-- **Sample Type**: Mus musculus feces
-- **Timepoints**: T1 = 1 day before diet introduction; T2 = 6 days after diet introduction and 1 day before Candida albicans gavage; T3 = 10 days after Candida albicans gavage.
-- **Groups**: Control (AIN-93G) diet vs FattyAcid (isocaloric high-oleic safflower oil) diet. Groups 1 and 2 (G1, G2) = T1; G3 and G4 = T2; G5 and G6 = T3. 
+- **Sample Type**: _Mus musculus_ feces
+- **Timepoints**: T1 = 1 day before introducing defined diets; T2 = 7 days after control and HOA diet introduction and 1 day before _Candida albicans_ gavage; T3 = 10 days after _Candida albicans_ gavage.
+- **Groups**: Control (AIN-93G) diet vs HOA (isocaloric high-oleic safflower oil) diet. Groups 1 and 2 (G1, G2) = T1; G3 and G4 = T2; G5 and G6 = T3. 
 - **Sequencing Platform**: Illumina NovaSeq 6000
 - **Target Region**: 16S rRNA sequencing of regions V3-V4
 - **Primers Used**: oligos 341F and 806R
