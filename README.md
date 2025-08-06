@@ -4,8 +4,25 @@
 
 ## Overview
 
-This repository contains all code, data, and documentation necessary to reproduce the microbiome analysis conducted for this study, which investigates the effects of high-oleic safflower oil diet on (1) the bacterial microbiome in the murine gut and (2) the ability of the fungus Candida albicans to establish intestinal colonization. To assess bacterial communities, 16S rRNA sequencing (V3-V4 with oligos 341F and 806R) was performed in DNA samples prepared from frozen fecal pellets. Female Swiss Webster mice (Taconic) at 5-8 weeks of age were used. ZymoBiomics DNA Microprep Kit (Zymo Research) was used to prepare DNA. Fresh fecal pellets were collected from 2 groups of 12 mice, each at 3 different time points (total 72 samples). Mice were divided in cages (two mice per cage), but mouse 1 and 2 cannot be used to track the same mouse across time; they are arbitrarily assigned based on the first mouse handled on the day of sampling. At the first time point, mice had been fed regular chow. The second time point was 7 days after switching from regular chow to defined diets (AIN-93G or isocaloric high-oleic safflower oil diet). All mice were gavaged with C. albicans (1x10^7 cells) one day after the second fecal collection. The third time point was 10 days after gavage.
+This repository contains all code, data, and documentation necessary to reproduce the microbiome analysis conducted for this study.
 
+Title: Diet-responsive genetic determinants of intestinal colonization in the yeast _Candida albicans_
+
+Musfirat Shubaita1,2, Mazen Oneissi1, Elena Lindemann-Pérez1, Anne-Marie Krachler1,2, Cecilia Fadhel Alvarez1,2, Diana M. Proctor1,2, and J. Christian Pérez1,2*
+
+Affiliations: 1 Department of Microbiology and Molecular Genetics, McGovern Medical School, The University of Texas Health Science Center at Houston, Houston, USA
+
+2 Graduate School of Biomedical Sciences, The University of Texas MD Anderson Cancer Center UTHealth Houston, Houston, USA
+
+Correspondence: Dr. J. Christian Perez
+                E-mail: jose.c.perez@uth.tmc.edu
+                Phone: +1 (713)500-5432
+                Fax: +1 (713)500-5499
+Bash scripts were optimized with the help of chatGPT
+
+Keywords: 
+
+Dietary components influence microbial composition in the digestive tract. Although often viewed as energy sources, dietary components are likely to shape microbial determinants of intestinal colonization beyond metabolism. Here, we report that a dietary long-chain fatty acid enhances the yeast Candida albicans colonization of the murine gut partly by eliciting modifications to the fungal cell surface. Mice fed an oleic acid-rich diet were readily colonized by C. albicans and exhibited higher fungal load in feces compared to rodents fed an isocaloric control diet. Surprisingly, β-oxidation, a catabolic process to break down fatty acids for energy production, was dispensable for C. albicans to colonize the high oleic acid diet-fed mice. 16S rRNA analysis detected rather modest differences in the bacterial communities between control and oleic acid-rich diets. We identified SOK1 as an oleic acid-induced kinase that dictates cell wall mannan exposure and binding to intestinal mucin under anaerobic conditions. Furthermore, oleic acid induced the expression of several C. albicans transcription factors that positively regulate intestinal colonization via remodeling of the fungal cell surface. We posit that in environments largely devoid of oxygen like the large intestine, dietary oleic acid favors a C. albicans cell surface configuration that enhances gut occupation.
 
 ---
 
