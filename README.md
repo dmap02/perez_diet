@@ -19,7 +19,7 @@ Affiliations: 1 Department of Microbiology and Molecular Genetics, McGovern Medi
   - Phone: +1 (713) 500-5432
   - Fax: +1 (713) 500-5499
                 
-R scripts were optimized with the help of Copilot and ChatGPT
+R scripts were optimized with the help of Copilot and ChatGPT.
 
 Keywords: 
 
