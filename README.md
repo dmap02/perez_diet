@@ -23,7 +23,7 @@ Bash scripts were optimized with the help of chatGPT
 
 Keywords: 
 
-  Dietary components influence microbial composition in the digestive tract. Although often viewed as energy sources, dietary components are likely to shape microbial determinants of intestinal colonization beyond metabolism. Here, we report that a dietary long-chain fatty acid enhances the yeast Candida albicans colonization of the murine gut partly by eliciting modifications to the fungal cell surface. Mice fed an oleic acid-rich diet were readily colonized by C. albicans and exhibited higher fungal load in feces compared to rodents fed an isocaloric control diet. Surprisingly, β-oxidation, a catabolic process to break down fatty acids for energy production, was dispensable for C. albicans to colonize the high oleic acid diet-fed mice. 16S rRNA analysis detected rather modest differences in the bacterial communities between control and oleic acid-rich diets. We identified SOK1 as an oleic acid-induced kinase that dictates cell wall mannan exposure and binding to intestinal mucin under anaerobic conditions. Furthermore, oleic acid induced the expression of several C. albicans transcription factors that positively regulate intestinal colonization via remodeling of the fungal cell surface. We posit that in environments largely devoid of oxygen like the large intestine, dietary oleic acid favors a C. albicans cell surface configuration that enhances gut occupation.
+Dietary components influence microbial composition in the digestive tract. Although often viewed as energy sources, dietary components are likely to shape microbial determinants of intestinal colonization beyond metabolism. Here, we report that a dietary long-chain fatty acid enhances the yeast Candida albicans colonization of the murine gut partly by eliciting modifications to the fungal cell surface. Mice fed an oleic acid-rich diet were readily colonized by C. albicans and exhibited higher fungal load in feces compared to rodents fed an isocaloric control diet. Surprisingly, β-oxidation, a catabolic process to break down fatty acids for energy production, was dispensable for C. albicans to colonize the high oleic acid diet-fed mice. 16S rRNA analysis detected rather modest differences in the bacterial communities between control and oleic acid-rich diets. We identified SOK1 as an oleic acid-induced kinase that dictates cell wall mannan exposure and binding to intestinal mucin under anaerobic conditions. Furthermore, oleic acid induced the expression of several C. albicans transcription factors that positively regulate intestinal colonization via remodeling of the fungal cell surface. We posit that in environments largely devoid of oxygen like the large intestine, dietary oleic acid favors a C. albicans cell surface configuration that enhances gut occupation.
 
 ---
 
@@ -177,17 +177,6 @@ Tested on Windows 11 Education and MacOS Sequoia 16.2
 Random seeds are set where applicable
 
 Filenames and metadata assumed to be UTF-8 encoded
-
-
-# Author and Contact
-
-Cecilia Fadhel Alvarez
-
-Department of Microbiology and Molecular Genetics, McGovern Medical School, University of Texas Health Science Center at Houston
-
-cecilia.m.fadhelalvarez@uth.tmc.edu | fadhel562@gmail.com
-
-Date Last Updated: 6/23/2025
 
 
 # Licenses and Citations
