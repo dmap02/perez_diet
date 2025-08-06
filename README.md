@@ -11,8 +11,7 @@ Title: Diet-responsive genetic determinants of intestinal colonization in the ye
 Musfirat Shubaita1,2, Mazen Oneissi1, Elena Lindemann-Pérez1, Anne-Marie Krachler1,2, Cecilia Fadhel Alvarez1,2, Diana M. Proctor1,2, and J. Christian Pérez1,2*
 
 Affiliations: 1 Department of Microbiology and Molecular Genetics, McGovern Medical School, The University of Texas Health Science Center at Houston, Houston, USA
-
-              2 Graduate School of Biomedical Sciences, The University of Texas MD Anderson Cancer Center UTHealth Houston, Houston, USA
+2 Graduate School of Biomedical Sciences, The University of Texas MD Anderson Cancer Center UTHealth Houston, Houston, USA
 
 Correspondence: Dr. J. Christian Perez
                 E-mail: jose.c.perez@uth.tmc.edu
