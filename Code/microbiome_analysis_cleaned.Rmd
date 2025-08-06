@@ -9,22 +9,21 @@ last updated: `r format(Sys.Date(), format="%B %d %Y")`
 ***
 
 
+**Manuscript Title:  Diet-responsive genetic determinants of intestinal colonization in the yeast Candida albicans**
 
-Manuscript Title: 
+**Authors** Musfirat Shubaita1,2, Mazen Oneissi1, Elena Lindemann-Pérez1, Anne-Marie Krachler1,2, Cecilia Fadhel Alvarez1,2, Diana M. Proctor1,2, and J. Christian Pérez1,2*
 
-Authors: 
+**Affiliations**
+1Department of Microbiology and Molecular Genetics, McGovern Medical School, The University of Texas Health Science Center at Houston, Houston, USA
+2Graduate School of Biomedical Sciences, The University of Texas MD Anderson Cancer Center UTHealth Houston, Houston, USA
 
-For correspondence: 
+* Corresponding author	E-mail  jose.c.perez@uth.tmc.edu
 
-
-Note: Microsoft copilot was used to clean up code.
-
-
-Affiliations:
+---
 
 Description of the dataset:
 
-Here, we seek to evaluate the effect of a diet on the microbiome as well its ability to buffer against effects induced by Candida colonization.
+Here, we seek to evaluate the effect of a diet on the microbiome as well its ability to buffer against effects induced by Candida colonization. This script contains the code used to generate Figure 2 as well as accompanying supplementary figures.
 
 ---
 
@@ -1333,12 +1332,21 @@ ggplot(tax.count, aes(x = Diet, y = round(100*value, 2), fill = Diet)) +
 
 
 
-# Make Figure 1 with distance based redundnancy as the method of fishing out taxa
+# Make Figure 2 with distance based redundnancy as the method of fishing out taxa
+
+Figure 2. Characterization of the effects of diet on gut bacterial diversity, composition, and community structure.
+(A) Schematic of the study design. Mice were fed either control or HOA diet. After seven days, they were gavaged with C. albicans. Fresh fecal pellets were collected at 3 time points. T1, baseline before introducing either diet; T2, a week after acclimatization to control and HOA diets but before administering C. albicans; T3, ~10 days after C. albicans gavage. dpi, day post infection.
+(B) Boxplot showing the distribution of Shannon entropy across time points. Each panel represents a study arm (control or HOA). The horizontal line within each box indicates the median, and the box spans the interquartile range (IQR). Statistical analysis using the Wilcoxon rank sum test. P values adjusted for multiple comparisons using Benjamini-Hochberg to control the False Discovery Rate (FDR) at 5%.
+(C) Principal coordinates analysis (PCoA) of unweighted UniFrac distances, showing the first two axes. Control and HOA diets are displayed as mirror images (left and right) to facilitate data visualization. Samples are colored by time point (T1, T2, T3), with shapes representing diet (circles = control; triangles = HOA) and point size corresponding to total sequencing depth. 
+(D) Relative abundance of the top 15 genera (of 182), with all remaining genera grouped as “Other.” Each bar represents one sample, ordered by the combined relative abundance of Lactobacillus, Bacteroides, and Barnesiella from left to right. 
+(E) Abundance of five taxa identified as significantly different across time by three analytical methods. Boxplots follow the same conventions as in panel B. Statistical analysis using the Wilcoxon rank sum test. P values adjusted for multiple comparisons using Benjamini-Hochberg to control the False Discovery Rate (FDR) at 5%. P values shown only if comparisons are statistically significant.
+
+
 
 ```{r, fig.height=10, fig.width=12, eval=FALSE}
 
 # Compose left side: fig1A (panel a), fig1B (panel b)
-fig1_top <- ggdraw() +
+fig2_top <- ggdraw() +
   # Panel a: left column
   draw_plot(fig1B, x = 0, y = 0, width = 0.5, height = 1) +
   draw_plot_label("B", x = 0.01, y = 0.98, size = 14, fontface = "bold") +
