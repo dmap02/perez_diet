@@ -1,0 +1,210 @@
+---
+title: "Taxonomy Assignmnet"
+author: "Cecilia Fadhel"
+date: "2025-08-07"
+output: html_document:
+---
+
+```{r}
+library(knitr)
+opts_chunk$set(eval=FALSE, echo=TRUE, warning=FALSE, message=FALSE, error = FALSE)
+```
+
+last updated: `r format(Sys.Date(), format="%B %d %Y")`
+
+***
+
+**Manuscript Title:  Diet-responsive genetic determinants of intestinal colonization in the yeast _Candida albicans_**
+
+**Authors** Musfirat Shubaita1,2, Mazen Oneissi1, Elena Lindemann-Pérez1, Anne-Marie Krachler1,2, Cecilia Fadhel Alvarez1,2, Diana M. Proctor1,2, and J. Christian Pérez1,2*
+
+**Affiliations**
+1Department of Microbiology and Molecular Genetics, McGovern Medical School, The University of Texas Health Science Center at Houston, Houston, USA
+2Graduate School of Biomedical Sciences, The University of Texas MD Anderson Cancer Center UTHealth Houston, Houston, USA
+
+* Corresponding author	E-mail  jose.c.perez@uth.tmc.edu
+
+The code on this script was adapted from the DADA2 tutorial (available here: https://benjjneb.github.io/dada2/tutorial.html) and optimized using ChatGPT.
+---
+
+This document demonstrates how to create taxonomy plots parting from the phyloseq object. The plots include bar plots and relative abundance visualizations at different taxonomic levels, such as Phylum, Class, Family, and Genus. These visualizations help assess the microbial composition of the samples.
+
+To start, load the necessary libraries and the phyloseq object.
+```{r message=FALSE, warning=FALSE}
+# Load necessary libraries
+library(phyloseq)
+library(ggplot2)
+library(dplyr)
+theme_set(theme_minimal())  # Clean theme for plots
+
+# Load the phyloseq object
+ps <- readRDS("/Users/ceciliafadhel/Desktop/microbiome_analysis/outputs/phyloseq_object.rds")
+
+# Convert metadata (sam_data) to data.frame
+metadata <- as.data.frame(sam_data(ps))
+```
+
+Then, create objects for the different taxonomic levels:
+```{r}
+ps_kingdom <- tax_glom(ps, taxrank = "Kingdom") # by Kingdom
+ps_phylum <- tax_glom(ps, taxrank = "Phylum") # by Phylum
+ps_class <- tax_glom(ps, taxrank = "Class") # by Class
+ps_order <- tax_glom(ps, taxrank = "Order") # by Order
+ps_family <- tax_glom(ps, taxrank = "Family") # by Family
+ps_genus <- tax_glom(ps, taxrank = "Genus") # by Genus
+ps_species <- tax_glom(ps, taxrank = "Species") # by Species
+```
+
+We wanted to plot relative abundance, so we transform the created objects into new objects containing the relative abundance information:
+```{r}
+# Transform to relative Abundance
+ps_kingdom_rel <- transform_sample_counts(ps_kingdom, function(x) x / sum(x))
+ps_phylum_rel <- transform_sample_counts(ps_phylum, function(x) x / sum(x))
+ps_class_rel <- transform_sample_counts(ps_class, function(x) x / sum(x))
+ps_order_rel <- transform_sample_counts(ps_order, function(x) x / sum(x))
+ps_family_rel <- transform_sample_counts(ps_family, function(x) x / sum(x))
+ps_genus_rel <- transform_sample_counts(ps_genus, function(x) x / sum(x))
+ps_species_rel <- transform_sample_counts(ps_species, function(x) x / sum(x))
+```
+
+Now, you are ready to plot the abundance by taxonomic level, using barplots:
+```{r message=FALSE, warning=FALSE}
+# Plot relative abundance at Kingdom level
+plot_bar(ps_kingdom_rel, fill = "Kingdom") +
+  labs(title = "Relative Abundance by Kingdom", x = "Sample", y = "Relative Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Plot relative abundance at Phylum level
+plot_bar(ps_phylum_rel, fill = "Phylum") +
+  labs(title = "Relative Abundance by Phylum", x = "Sample", y = "Relative Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+# Plot relative abundance at Class level
+plot_bar(ps_class_rel, fill = "Class") +
+  labs(title = "Relative Abundance by Class", x = "Sample", y = "Relative Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+Sometimes the legend contains too many values and it does not fit together with the plot. This happens specifically when plotting taxonomic levels below the Order level. For this, you can remove the legend at the moment of plotting to be able to clearly see the plot. To to this, use the following code:
+```{r}
+# To plot without legend if the plot is too crowded (order level)
+main_plot <- plot_bar(ps_order_rel, fill = "Order") +
+  labs(title = "Relative Abundance by Order", x = "Sample", y = "Relative Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+        legend.position = "none") # Hides the legend
+```
+
+Now, you may want to save the plot's legend individually for future reference:
+```{r message=FALSE, warning=FALSE}
+# First set your plot as a data set
+order.plot <- plot_bar(ps_order_rel, fill = "Order") +
+  labs(title = "Relative Abundance by Order", x = "Sample", y = "Relative Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+Now, plot the data without the legend:
+```{r}
+# Plot the data without the legend
+order_plot_no_legend <- order.plot + theme(legend.position = "none")
+print(order_plot_no_legend) # Save the plot
+```
+
+The last step is to extract the legend and save individually:
+```{r message=FALSE, warning=FALSE}
+# Install and load the cowplot library
+library(cowplot)
+
+# Extract the legend
+legend <- get_legend(order.plot)
+legend_plot <- ggdraw(legend)
+print(legend_plot) # Save legend
+```
+
+Repeat these last steps for each taxonomic level of interest by only substituting the taxa level name by that of interest in the code.
+
+For our data, we wanted to look for any trends or changes in bacterial composition when comparing our groups. So we decided to make taxonomy plots by group. First, verify that the metadata in your ```phyloseq``` contains the information for your variable of interest, in this case, Group:
+```{r}
+# Check if metadata is integrated
+sample_data(ps)
+
+# If the group column is present in the metadata, confirm the column name
+head(sample_data(ps)$Group)
+```
+
+If the metadata is not integrated, load it and add it to the ```phyloseq```:
+```{r}
+# Assuming `metadata` is a data frame with row names matching sample names
+sample_data(ps) <- metadata
+```
+
+Now you will want to transform your ```phyloseq``` object to aggregate your samples in Groups. If you want to obtain a mean of the relative abundance for each group, and plot a single bar for each group instead of by samples, run the following:
+```{r}
+# Aggregates samples by group
+ps_grouped <- merge_samples(ps, "Group")
+
+# Transform to relative abundance
+ps_grouped_rel <- transform_sample_counts(ps_grouped, function(x) x / sum(x))
+
+library(ggplot2)
+
+# Aggregate to a specific taxonomic level (e.g., Phylum)
+ps_phylum <- tax_glom(ps_grouped_rel, taxrank = "Phylum")
+
+# Create the bar plot
+plot_bar(ps_phylum, fill = "Phylum") +
+  labs(title = "Relative Abundance by Group", x = "Group", y = "Relative Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+In our case, we also wanted to see the data for each sample, rather than only a mean for each group. To show all the samples in each group you will have to subset for each group and calculate the relative abundance as well.
+```{r}
+# Subset for a specific group (e.g., "Group 1")
+ps_group1 <- subset_samples(ps, Group == "G1")
+
+# Transform to relative abundance
+ps_group1_rel <- transform_sample_counts(ps_group1, function(x) x / sum(x))
+
+# Aggregate to a specific taxonomic level (e.g., Phylum)
+ps_group1_phylum <- tax_glom(ps_group1_rel, taxrank = "Phylum")
+
+# Create a bar plot for individual samples
+plot_bar(ps_group1_phylum, fill = "Phylum") +
+  labs(title = "Relative Abundance in Group 1", x = "Sample", y = "Relative Abundance") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+```
+
+If you want to automate this process and create and save a plot for each group automatically, run the following code. Make sure that you are working in the desired directory (```getwd()```) as this is where the plots will be saved to. Note that you may need to modify part of this chunk depending on the taxonomic level that you may want to plot.
+```{r}
+# Get the unique group names
+group_names <- unique(sample_data(ps)$Group)
+
+# Loop through each group
+holder <- vector("list", length(group_names))
+for (i in length(group_names)) {
+  # Subset the Phyloseq object for the group
+  ps_group <- subset_samples(ps, Group == group)
+  
+  # Transform to relative abundance
+  ps_group_rel <- transform_sample_counts(ps_group, function(x) x / sum(x))
+  
+  # Aggregate at the desired taxonomic level
+  ps_group_phylum <- tax_glom(ps_group_rel, taxrank = "Phylum")
+  
+  # Create the plot
+  p <- plot_bar(ps_group_phylum, fill = "Phylum") +
+    labs(title = paste("Relative Abundance in", group), x = "Sample", y = "Relative Abundance") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+  holder[[i]] <- p
+  # Save the plot as a file
+  ggsave(paste0("Relative_Abundance_", group, ".png"), plot = p, width = 10, height = 6)
+}
+```
+

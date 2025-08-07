@@ -1,0 +1,221 @@
+---
+title: "Data Cleaning with DADA2 and Phyloseq object creation"
+author: "Cecilia Fadhel"
+date: "2025-05-30"
+output: html_document
+---
+
+```{r}
+library(knitr)
+opts_chunk$set(eval=FALSE, echo=TRUE, warning=FALSE, message=FALSE, error = FALSE)
+```
+
+last updated: `r format(Sys.Date(), format="%B %d %Y")`
+
+***
+
+**Manuscript Title:  Diet-responsive genetic determinants of intestinal colonization in the yeast _Candida albicans_**
+
+**Authors** Musfirat Shubaita1,2, Mazen Oneissi1, Elena Lindemann-Pérez1, Anne-Marie Krachler1,2, Cecilia Fadhel Alvarez1,2, Diana M. Proctor1,2, and J. Christian Pérez1,2*
+
+**Affiliations**
+1Department of Microbiology and Molecular Genetics, McGovern Medical School, The University of Texas Health Science Center at Houston, Houston, USA
+2Graduate School of Biomedical Sciences, The University of Texas MD Anderson Cancer Center UTHealth Houston, Houston, USA
+
+* Corresponding author E-mail: jose.c.perez@uth.tmc.edu
+
+The code on this script was adapted from the DADA2 tutorial (available here: https://benjjneb.github.io/dada2/tutorial.html) and optimized using ChatGPT.
+
+---
+
+**Description of the dataset:**
+
+This script contains the code to run the DADA2 program for the filtering, merging and denoising of paired-end 16s rRNA sequencing data, and for the taxonomic assignment and plotting of such. This dataset consists of 72 paired-end 16S rRNA samples from mouse fecal matter, sequenced using Illumina MiSeq (V3-V4 region). Each sample has a forward (R1) and reverse (R2) read file in `.fastq.gz` format. Files are named following the convention:
+
+```
+M1.D2F31.1_R1_001.fastq.gz
+M1.D2F31.1_R2_001.fastq.gz
+```
+
+All raw reads were processed directly using the DADA2 pipeline in R.
+
+---
+
+First, load R packages or install, if necessary.
+```{r}
+# Install/load packages
+required_packages <- c("dada2", "phyloseq", "ggplot2", "reshape2", "knitr")
+
+for (pkg in required_packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    install.packages(pkg)
+  }
+  library(pkg, character.only = TRUE)
+}
+
+# Define path to raw reads
+path <- "C:/Users/cfadhelalvarez/Desktop/raw_data copy 2"
+list.files(path, pattern = "fastq.gz")
+
+# Get filenames for forward (_R1_) and reverse (_R2_) reads
+fnFs <- sort(list.files(path, pattern="_R1_001.fastq.gz", full.names=TRUE))
+fnRs <- sort(list.files(path, pattern="_R2_001.fastq.gz", full.names=TRUE))
+
+# Extract sample names (everything before _R1_ or _R2_)
+sample.names <- sapply(strsplit(basename(fnFs), "_R1_001.fastq.gz"), `[`, 1)
+```
+
+# Data Quality Control
+
+## Decontamination
+
+Decontamination was not performed in this analysis because no negative controls were sequenced. In the future, it's advisable that DNA extraction controls are included (at a minimum), which would be extraction from the specimen collection materials used in the study. This allows us to remove contaminants from the specimen collection materials and from reagents, which is important because we do see conventional reagent contaminants like Sphingomonas in this data. Samples were processed directly from raw `.fastq.gz` files.
+
+## DADA2 Pipeline
+
+We processed both forward-only and merged reads using various parameter sets. For forward reads, we used the following parameter combinations:
+
+- `len230_f2_rNULL`  → truncLen = 230, maxEE = 2
+- `len230_f5_rNULL`  → truncLen = 230, maxEE = 5
+- `len240_f2_rNULL`  → truncLen = 240, maxEE = 2
+- `len240_f5_rNULL`  → truncLen = 240, maxEE = 5
+- `len250_f2_rNULL`  → truncLen = 250, maxEE = 2
+- `len250_f5_rNULL`  → truncLen = 250, maxEE = 5
+
+Example of forward reads filtering:
+
+```{r, eval=FALSE}
+#fnFs <- sort(list.files(path, pattern="_R1_001.fastq.gz", full.names = TRUE))
+#sample.names <- sapply(strsplit(basename(fnFs), "_"), `[`, 1)
+#filtFs <- file.path(path, "filtered_len250_f2_rNULL", paste0(sample.names, "_F_filt.fastq.gz"))
+#names(filtFs) <- sample.names
+
+#out <- filterAndTrim(fnFs, filtFs, truncLen=c(250), maxN=0, maxEE=c(5), truncQ=2, #rm.phix=TRUE, compress=TRUE, multithread=TRUE) # On Windows, set multithread=FALSE
+```
+
+Parameters used for merged reads:
+
+- `len250_EE2_2` → truncLen = c(250, 250), maxEE = c(2, 2)
+- `len250_EE5_5` → truncLen = c(250, 250), maxEE = c(5, 5)
+- `len250_EE2_5` → truncLen = c(250, 250), maxEE = c(2, 5) *up to tracking step only*
+- `len250_EEInf_Inf` → all learned error models applied *up to tracking stage only*
+
+Let's start by filtering the reads.
+```{r}
+# Create filtered file paths
+filt_path <- file.path(path, "filtered")
+if(!dir.exists(filt_path)) dir.create(filt_path)
+
+filtFs <- file.path(filt_path, paste0(sample.names, "_F_filt.fastq.gz"))
+filtRs <- file.path(filt_path, paste0(sample.names, "_R_filt.fastq.gz"))
+
+# Filter and trim (minimal filtering)
+out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs,
+                     truncLen=c(250, 250),
+                     maxN=0,
+                     maxEE=c(Inf, Inf),
+                     truncQ=2,
+                     rm.phix=TRUE,
+                     compress=TRUE, multithread=TRUE)
+
+# Learn error rates (still needed for format)
+errF <- learnErrors(filtFs, multithread=TRUE)
+errR <- learnErrors(filtRs, multithread=TRUE)
+
+# Dereplication
+derepFs <- derepFastq(filtFs)
+derepRs <- derepFastq(filtRs)
+names(derepFs) <- sample.names
+names(derepRs) <- sample.names
+
+# Denoising with error correction off
+dadaFs <- dada(filtFs, err=errF, multithread=TRUE)
+dadaRs <- dada(filtRs, err=errR, multithread=TRUE)
+dadaFs[[1]]
+```
+
+Now, you can merge the reads.
+```{r}
+# Merge pairs
+mergers <- mergePairs(dadaFs, derepFs, dadaRs, derepRs, verbose=TRUE)
+```
+
+## Read Tracking and Retention Visualization
+
+Read tracking data for each parameter set was saved as separate CSV files, following this convention:
+
+- `read_tracking%_PerezDiet_forward_Len230_F2.csv` → forward
+- `read_tracking_summary_Len250_EE5_5.csv` → merged
+
+Here, you construct the sequence table and save it for read tracking.
+```{r}
+# Make sequence table and remove chimeras
+seqtab <- makeSequenceTable(mergers)
+seqtab.nochim <- removeBimeraDenovo(seqtab, method="consensus", multithread=TRUE, verbose=TRUE)
+
+# Save intermediate objects, if necessary (optional)
+# saveRDS(seqtab.nochim, file.path(path, ""))
+
+# Track reads through the pipeline
+getN <- function(x) sum(getUniques(x))
+track <- cbind(out,
+               sapply(dadaFs, getN),
+               sapply(dadaRs, getN),
+               sapply(mergers, getN),
+               rowSums(seqtab.nochim))
+colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "nonchim")
+rownames(track) <- sample.names
+
+# Print dimensions of final table
+print(dim(seqtab.nochim))
+
+# Calculate percentages
+filter_pct <- round((filtered_reads / input_reads) * 100, 2)
+denoiseF_pct <- round((denoisedF_reads / filtered_reads) * 100, 2)
+denoiseR_pct <- round((denoisedR_reads / filtered_reads) * 100, 2)
+merge_pct <- round((merged_reads / denoisedF_reads) * 100, 2)
+chimera_pct <- round((nonchim_reads / merged_reads) * 100, 2)
+overall_pct <- round((nonchim_reads / input_reads) * 100, 2)
+
+# Create the tracking table with additional metrics
+track2 <- data.frame(
+  input = input_reads,
+  filtered = filtered_reads,
+  denoisedF = denoisedF_reads,
+  denoisedR = denoisedR_reads,
+  merged = merged_reads,
+  nonchim = nonchim_reads,
+  filter_pct = filter_pct,
+  denoiseF_pct = denoiseF_pct,
+  denoiseR_pct = denoiseR_pct,
+  merge_pct = merge_pct,
+  chimera_pct = chimera_pct,
+  overall_pct = overall_pct
+)
+
+# Assign sample names as row names
+rownames(track2) <- sample.names
+
+# Save the summary table as a CSV or TSV file
+write.csv(track, "C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/read_tracking_merged_Len250_EE5_5.csv", row.names = TRUE)
+```
+
+To compare across parameter sets, you can load multiple tracking files, add a `param_set` column, and bind them into a single data frame.
+
+## Constructing the phyloseq object
+
+Now, you can assign taxonomy and build the phyloseq object. All subsequent analyses will be done parting from the phyloseq object. Download the database or databases needed and place in the folder that contains your raw data file. We used the RefSeq and GTDB databases (available here: https://benjjneb.github.io/dada2/training.html) for purposes of this study.
+```{r}
+# Assign taxonomy
+taxa_RefSeq <- assignTaxonomy(seqtab.nochim, "C:/Users/cfadhelalvarez/Desktop/raw_data copy 2/RefSeq-RDPv2_16S_species.fa", multithread=TRUE)
+taxa_GTDB <- assignTaxonomy(seqtab.nochim, "C:/Users/cfadhelalvarez/Desktop/raw_data copy 2/GTDB_bac120_arc122_ssu_r202_fullTaxo.fa", multithread=TRUE)
+samples.out <- rownames(seqtab.nochim)
+samdf <- data.frame(SampleID = samples.out)
+rownames(samdf) <- samples.out
+
+# Create and save phyloseq object with the sample data and taxonomy data
+ps_RefSeq <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), tax_table(taxa_RefSeq), sample_data(samdf))
+saveRDS(ps_RefSeq, file="C:/Users/cfadhelalvarez/Desktop/perez_diet/rds_objects/PerezDiet_merged_Len250_EE5_5_RefSeq.rds")
+ps_GTDB <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), tax_table(taxa_GTDB), sample_data(samdf))
+saveRDS(ps_GTDB, file="C:/Users/cfadhelalvarez/Desktop/perez_diet/rds_objects/PerezDiet_merged_Len250_EE5_5_GTDB.rds")
+```
