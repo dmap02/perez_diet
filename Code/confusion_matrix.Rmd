@@ -157,11 +157,11 @@ venn.plot <- draw.pairwise.venn(
 )
 
 # Optional: Inspect genera found only in one or both datasets
-# only_forward <- filter(confusion_matrix, Present_in_Forward == "1", Present_in_Merged == "0")
-# only_merged  <- filter(confusion_matrix, Present_in_Forward == "0", Present_in_Merged == "1")
-# in_both      <- filter(confusion_matrix, Present_in_Forward == "1", Present_in_Merged == "1")
+only_forward <- filter(confusion_matrix, Present_in_Forward == "1", Present_in_Merged == "0")
+only_merged  <- filter(confusion_matrix, Present_in_Forward == "0", Present_in_Merged == "1")
+in_both      <- filter(confusion_matrix, Present_in_Forward == "1", Present_in_Merged == "1")
 
-# Step 7: Optional – Export tables (if not exported already)
+# Optional: Export tables (if not exported already)
 write.csv(confusion_matrix, "C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/genus_confusion_matrix_blast_only.csv", row.names = FALSE)
 write.csv(otu_trace_matrix, "C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/genus_to_otus_trace_blast_only.csv", row.names = FALSE)
 ```
