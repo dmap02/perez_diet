@@ -31,15 +31,15 @@ This script contains the code to generate a confusion matrix and decide which da
 
 ---
 
+```{r}
+library(knitr)
+opts_chunk$set(fig.width=12, fig.height=8, 
+               echo=TRUE, warning=FALSE, message=FALSE, error = FALSE)
+```
+
 First, load R packages or install, if necessary.
 ```{r}
-# Manually set working directory to the repo root (modify as needed)
-setwd("..")  # Adjust as needed if Rmd is in a subdirectory
-
-# Run the following script to install and load all analysis packages
-source("scripts/install_packages.R")
-
-# Or manually install/load packages
+# Install/load packages
 required_packages <- c("readxl", "dplyr", "tidyr", "VennDiagram", "phyloseq", "tibble")
 
 for (pkg in required_packages) {
@@ -53,8 +53,11 @@ for (pkg in required_packages) {
 Load your phyloseq object (skip if already loaded)
 ```{r}
 # Use load("your_phyloseq_object.RData") for an RData file  # or use readRDS("file.rds") for a phyloseq
-ps <- readRDS("rds_objects/PerezDiet_merged_Len250_EE5_5_RefSeq.rds")
+ps <- readRDS("C:/Users/cfadhelalvarez/Desktop/perez_diet/rds_objects/PerezDiet_merged_Len250_EE5_5_RefSeq.rds")
+```
 
+Now, we extract taxonomy and build a table with the sequences to blast and empty columns to input the blast results.
+```{r}
 # Extract taxonomy table from phyloseq
 taxa <- as.data.frame(tax_table(ps))
 
@@ -77,18 +80,24 @@ blast_table <- taxa_genus %>%
   )
 
 # Optional – Save initial version
-write.csv(blast_table, "empty_BLAST_table_PerezDiet_merged_Len250_EE5_5.csv", row.names = FALSE)
+write.csv(blast_table, "C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/empty_BLAST_table_PerezDiet_merged_Len250_EE5_5.csv", row.names = FALSE)
+```
 
-# Manually add BLAST results (or do it outside of R and read in filled table after)
+Manually add BLAST results or do it outside of R and read in table (if so, skip this step).
+```{r}
+# Manually add BLAST results or do it outside of R and read in table (if so, skip this step).
 blast_table$Top_BLAST_Hit[1] <- "Bacteroides thetaiotaomicron"
 blast_table$Alternative_Hit[1] <- "Bacteroides xylanisolvens"
 
 # Save final version
-write.csv(blast_table, "BLAST_table_PerezDiet_merged_Len250_EE5_5.csv", row.names = FALSE)
+write.csv(blast_table, "C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/BLAST_table_PerezDiet_merged_Len250_EE5_5.csv", row.names = FALSE)
+```
 
-# If starting from the BLAST table: Read in the Excel files (Sheet 2 has names only without percentages)
-forward_df <- read_excel("results/tables/BLAST_table_PerezDiet_forward_Len250_f5_rNULL.xlsx", sheet = 2)
-merged_df <- read_excel("results/tables/BLAST_table_PerezDiet_merged_Len250_EE5_5.xlsx", sheet = 2)
+If starting from the BLAST table: Read in the Excel files (Sheet 2 has names only without match percentages)
+```{r}
+# Read in tables
+forward_df <- read_excel("C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/BLAST_table_PerezDiet_forward_Len250_f5_rNULL.xlsx", sheet = 2)
+merged_df <- read_excel("C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/BLAST_table_PerezDiet_merged_Len250_EE5_5.xlsx", sheet = 2)
 
 # Extract genus names from BLAST columns only
 extract_blast_genera <- function(df) {
@@ -97,7 +106,10 @@ extract_blast_genera <- function(df) {
 
 forward_genera <- extract_blast_genera(forward_df)
 merged_genera <- extract_blast_genera(merged_df)
+```
 
+Now you can create the confusion matrix showing the presense and absense of genera.
+```{r}
 # Create a confusion matrix (presence/absence)
 all_genera <- sort(unique(c(forward_genera, merged_genera)))
 
@@ -128,7 +140,10 @@ forward_map <- get_blast_genus_to_otus(forward_df, "Forward")
 # Combine OTU trace info
 otu_trace_matrix <- full_join(merged_map, forward_map, by = "Genus") %>%
   arrange(Genus)
+```
 
+You can visualize this by creating a Venn Diagram.
+```{r}
 # Create Venn Diagram
 venn.plot <- draw.pairwise.venn(
   area1 = length(merged_genera),
@@ -146,6 +161,7 @@ venn.plot <- draw.pairwise.venn(
 # only_merged  <- filter(confusion_matrix, Present_in_Forward == "0", Present_in_Merged == "1")
 # in_both      <- filter(confusion_matrix, Present_in_Forward == "1", Present_in_Merged == "1")
 
-# Step 7: Optional – Export tables
-write.csv(confusion_matrix, "genus_confusion_matrix_blast_only.csv", row.names = FALSE)
-write.csv(otu_trace_matrix, "genus_to_otus_trace_blast_only.csv", row.names = FALSE)
+# Step 7: Optional – Export tables (if not exported already)
+write.csv(confusion_matrix, "C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/genus_confusion_matrix_blast_only.csv", row.names = FALSE)
+write.csv(otu_trace_matrix, "C:/Users/cfadhelalvarez/Desktop/perez_diet/tables/genus_to_otus_trace_blast_only.csv", row.names = FALSE)
+```
